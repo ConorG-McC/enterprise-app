@@ -10,7 +10,7 @@
         <module name="project" />
         <module name="common" />
         <module name="identity" />
-        <module name="order" />
+        <module name="assignment" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -19,9 +19,9 @@
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="assignment" options="-parameters" />
       <module name="common" options="-parameters" />
       <module name="identity" options="-parameters" />
-      <module name="order" options="-parameters" />
       <module name="project" options="-parameters" />
       <module name="test" options="-parameters" />
     </option>
