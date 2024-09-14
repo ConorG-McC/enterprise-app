@@ -15,6 +15,11 @@ import lombok.*;
 //interface enables GetOrderItemsResponse to avoid coupling to interface layer via MenuItemValueObject
 public class Task implements BaseTaskValueObject {
     @Id
+    @SequenceGenerator(name= "task_sequence",
+            sequenceName = "task_sequence_id",
+            allocationSize = 1)
+    @GeneratedValue(strategy=GenerationType.IDENTITY,
+            generator="task_sequence")
     @Column(name="task_id")
     private long id;
 
