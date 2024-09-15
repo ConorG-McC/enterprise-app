@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,6 +32,11 @@ public class ProjectApplicationService {
 
     public String createProjectWithTasks(CreateProjectCommand command) throws ProjectDomainException {
         try {
+            Optional<BaseProject> projectFromRepo =
+                    projectRepository.findByName(command.getProjectName());
+            if (projectFromRepo.isPresent()) {
+                throw new IllegalArgumentException("Project name already exists");
+            }
             Identity idOfNewProject = UniqueIDFactory.createID();
             //Convert tasks from command as need to pass to aggregate constructor that way + cannot use mapper
             List<BaseTask> tasks = command.getTasks().stream()
