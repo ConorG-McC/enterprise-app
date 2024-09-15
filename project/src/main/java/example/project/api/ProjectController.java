@@ -107,6 +107,18 @@ public class ProjectController {
         return generateErrorResponse("user not authorised");
     }
 
+    @DeleteMapping
+    public ResponseEntity<?> deleteProject(@RequestHeader("Authorization") String token, @RequestBody String projectId) {
+        try {
+            if (identityService.isAdmin(token)) {
+                return new ResponseEntity<>(projectApplicationService.deleteProjectById(projectId), HttpStatus.GONE);
+            }
+        } catch (ProjectDomainException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unable to delete project: " + e);
+        }
+        return generateErrorResponse("user not authorised");
+    }
+
     private ResponseEntity<?> generateErrorResponse(String message){
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
     }
