@@ -11,8 +11,8 @@
 	<groupId>example</groupId>
 	<artifactId>assignment</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>taskAssignment</name>
-	<description>taskAssignment</description>
+	<name>assignment</name>
+	<description>assignment</description>
 	<url/>
 	<licenses>
 		<license/>
@@ -113,9 +113,7 @@
 							<artifactId>lombok</artifactId>
 						</exclude>
 					</excludes>
-
 				</configuration>
-
 			</plugin>
 		</plugins>
 	</build>

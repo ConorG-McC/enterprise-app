@@ -9,12 +9,12 @@
         <outputRelativeToContentRoot value="true" />
         <module name="project" />
         <module name="common" />
-        <module name="identity" />
         <module name="assignment" />
+        <module name="identity" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="test" target="22" />
+      <module name="Assignment" target="21" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
@@ -23,7 +23,6 @@
       <module name="common" options="-parameters" />
       <module name="identity" options="-parameters" />
       <module name="project" options="-parameters" />
-      <module name="test" options="-parameters" />
     </option>
   </component>
 </project>
