@@ -45,17 +45,5 @@ public abstract class AssertionConcern {
             throw new IllegalArgumentException(aMessage);
         }
     }
-
-    protected void assertDateIsBefore(LocalDateTime dateBeingChecked, LocalDateTime dateMustBeBefore, String aMessage) {
-        if (dateBeingChecked.isBefore(dateMustBeBefore)) {
-            throw new IllegalArgumentException(aMessage);
-        }
-    }
-
-    protected void assertDateIsAfter(LocalDateTime dateBeingChecked, LocalDateTime dateMustBeAfter, String aMessage) {
-        if (dateBeingChecked.isAfter(dateMustBeAfter)) {
-            throw new IllegalArgumentException(aMessage);
-        }
-    }
 }
 

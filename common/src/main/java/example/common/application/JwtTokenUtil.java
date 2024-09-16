@@ -17,7 +17,7 @@ import java.util.function.Function;
 
 @Component
 public class JwtTokenUtil {
-    public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60;
+    public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60; // 5 Hours
 
     //Needs to be external (not done that yet as no application.properties in this project)
     private String secret = "$7T7w0JJLkTtt_eBJdgb0iOYmvoXhBTWDOBWg!";
