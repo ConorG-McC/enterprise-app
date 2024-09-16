@@ -107,8 +107,8 @@ public class ProjectController {
         return generateErrorResponse("user not authorised");
     }
 
-    @DeleteMapping
-    public ResponseEntity<?> deleteProject(@RequestHeader("Authorization") String token, @RequestBody String projectId) {
+    @DeleteMapping("/{projectId}")
+    public ResponseEntity<?> deleteProject(@RequestHeader("Authorization") String token, @PathVariable String projectId) {
         try {
             if (identityService.isAdmin(token)) {
                 return new ResponseEntity<>(projectApplicationService.deleteProjectById(projectId), HttpStatus.GONE);
