@@ -55,21 +55,21 @@ public class ProjectTests {
     @Test
     @DisplayName("A project can locate a task that it contains")
     void test05(){
-        List<BaseTask> menuItems =new ArrayList<>();
+        List<BaseTask> tasks =new ArrayList<>();
         BaseTask newItem = new Task(VALID_TASK_ID, "item name", new Hours(1));
 
-        menuItems.add(newItem);
-        Project sut=new Project(VALID_ID,VALID_NAME,menuItems);
+        tasks.add(newItem);
+        Project project = new Project(VALID_ID,VALID_NAME,tasks);
 
-        assertTrue(sut.findTask(VALID_TASK_ID));
+        assertTrue(project.findTask(VALID_TASK_ID));
     }
 
     @Test
     @DisplayName("A project cannot locate a task that it does not contain")
     void test06(){
         //No need to arrange - just act and assert
-        Project sut=new Project(VALID_ID,VALID_NAME, VALID_TASKS);
+        Project project = new Project(VALID_ID,VALID_NAME, VALID_TASKS);
 
-        assertFalse(sut.findTask(VALID_TASK_ID));
+        assertFalse(project.findTask(VALID_TASK_ID));
     }
 }

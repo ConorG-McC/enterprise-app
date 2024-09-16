@@ -40,7 +40,7 @@ public class TaskTests {
 
     //Note I had to add a validate menuItems check to the MenuItems class constructor for this to work (missing previously)
     @Test
-    @DisplayName("A task will reject an invalid Money value")
+    @DisplayName("A task will reject an invalid Hour value")
     void test04(){
         assertThrows(IllegalArgumentException.class, () -> {
             new Task(VALID_MENU_ITEM_ID,VALID_NAME,null);
