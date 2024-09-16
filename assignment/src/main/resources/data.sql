@@ -24,4 +24,5 @@ VALUES (2, 2, 'Design Frontend UI', 12.0, 'a1');
 
 --sequence for id's required for saves of new records in the application class (not when using sql here)
 --check OrderLineItem (infrastructure) for use of sequence
-create sequence assigned_task_sequence_id start with (select max(assigned_task_id) + 1 from assigned_task);
+CREATE SEQUENCE task_sequence_id START WITH (SELECT MAX(task_id) + 1 FROM task);
+CREATE SEQUENCE assigned_task_sequence_id START WITH (SELECT MAX(assigned_task_id) + 1 FROM assigned_task);

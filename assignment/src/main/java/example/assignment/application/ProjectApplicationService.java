@@ -46,4 +46,34 @@ public class ProjectApplicationService {
         projectRepository.save(ProjectDomainToInfrastructureConvertor.convert(project));
     }
 
+    public String deleteProjectById(String projectId) throws Exception {
+
+
+        try {
+            if (projectId == null || projectId.isEmpty()) {
+                throw new ProjectNotFoundException("Project id is null or empty");
+            }
+
+            Optional<example.assignment.infrastructure.Project> projectFromRepo =
+                    projectRepository.findById(projectId);
+            if (projectFromRepo.isEmpty()) {
+                throw new IllegalArgumentException("Project not found with id " + projectId);
+            }
+
+            projectRepository.deleteById(projectId);
+
+            String response = "Project with id" + projectId + " deleted";
+            return response;
+        }
+        catch (ProjectNotFoundException e) {
+            throw new Exception(e.getMessage());
+        }
+        catch (IllegalArgumentException e) {
+            throw new Exception(e.getMessage());
+        }
+        catch (Exception e) {
+            throw new Exception("Error deleting project from repository with id: " + projectId + "\n Error: " + e.getMessage());
+        }
+    }
+
 }

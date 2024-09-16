@@ -99,10 +99,22 @@ public class ProjectController {
             return generateErrorResponse(jwtException.getMessage());
         }
         catch(ProjectDomainException | JsonParseException e){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unable to create project");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unable to create project: " + e);
         }
         catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred", e);
+        }
+        return generateErrorResponse("user not authorised");
+    }
+
+    @DeleteMapping
+    public ResponseEntity<?> deleteProject(@RequestHeader("Authorization") String token, @RequestBody String projectId) {
+        try {
+            if (identityService.isAdmin(token)) {
+                return new ResponseEntity<>(projectApplicationService.deleteProjectById(projectId), HttpStatus.GONE);
+            }
+        } catch (ProjectDomainException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unable to delete project: " + e);
         }
         return generateErrorResponse("user not authorised");
     }

@@ -15,36 +15,36 @@ public class ProjectTests {
     //Generate controlled UUID rather than rely on UniqueIDFactory dependency
     private Identity VALID_ID = new Identity("0000-00-00-00-000001");
     private String VALID_NAME="name";
-    private List<BaseTask> VALID_MENU_ITEMS=new ArrayList<>();
+    private List<BaseTask> VALID_TASKS =new ArrayList<>();
 
-    private long VALID_MENU_ITEM_ID = 1L;
+    private long VALID_TASK_ID = 1L;
     @Test
-    @DisplayName("A new Restaurant is created with valid details")
+    @DisplayName("A new project is created with valid details")
     void test01(){
         assertDoesNotThrow(() -> {
-            new Project(VALID_ID,VALID_NAME,VALID_MENU_ITEMS);
+            new Project(VALID_ID,VALID_NAME, VALID_TASKS);
         });
     }
 
     //Note I had to add a validate id check to the Entity class constructor for this to work (missing previously)
     @Test
-    @DisplayName("A Restaurant will reject an invalid identity")
+    @DisplayName("A project will reject an invalid identity")
     void test02(){
         assertThrows(IllegalArgumentException.class, () -> {
-            new Project(null,VALID_NAME,VALID_MENU_ITEMS);
+            new Project(null,VALID_NAME, VALID_TASKS);
         });
     }
 
     @Test
-    @DisplayName("A Restaurant will reject an invalid name")
+    @DisplayName("A project will reject an invalid name")
     void test03(){
         assertThrows(IllegalArgumentException.class, () -> {
-            new Project(VALID_ID,"",VALID_MENU_ITEMS);
+            new Project(VALID_ID,"", VALID_TASKS);
         });
     }
 
     @Test
-    @DisplayName("A Restaurant will reject invalid menu items")
+    @DisplayName("A project will reject invalid tasks")
     void test04(){
         assertThrows(IllegalArgumentException.class, () -> {
             new Project(VALID_ID,VALID_NAME,null);
@@ -53,23 +53,23 @@ public class ProjectTests {
 
     //Note - I had to add a setMenuItems method to Restaurant to validate menu items (missing previously)
     @Test
-    @DisplayName("A Restaurant can locate a menu item that it contains")
+    @DisplayName("A project can locate a task that it contains")
     void test05(){
         List<BaseTask> menuItems =new ArrayList<>();
-        BaseTask newItem = new Task(VALID_MENU_ITEM_ID, "item name", new Hours(1));
+        BaseTask newItem = new Task(VALID_TASK_ID, "item name", new Hours(1));
 
         menuItems.add(newItem);
         Project sut=new Project(VALID_ID,VALID_NAME,menuItems);
 
-        assertTrue(sut.findTask(VALID_MENU_ITEM_ID));
+        assertTrue(sut.findTask(VALID_TASK_ID));
     }
 
     @Test
-    @DisplayName("A Restaurant cannot locate a menu item that it does not contain")
+    @DisplayName("A project cannot locate a task that it does not contain")
     void test06(){
         //No need to arrange - just act and assert
-        Project sut=new Project(VALID_ID,VALID_NAME,VALID_MENU_ITEMS);
+        Project sut=new Project(VALID_ID,VALID_NAME, VALID_TASKS);
 
-        assertFalse(sut.findTask(VALID_MENU_ITEM_ID));
+        assertFalse(sut.findTask(VALID_TASK_ID));
     }
 }

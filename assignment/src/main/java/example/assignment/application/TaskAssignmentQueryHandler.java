@@ -46,14 +46,6 @@ public class TaskAssignmentQueryHandler {
                                             TaskState.values()[order.getTask_state()].name());//Avoid JSON conversion error
     }
 
-//    private GetTaskAssignmentItemsResponse makeGetOrderItemsResponse(TaskAssignment order) {
-//        LOG.info("TEST: ahhh is {} ", order);
-//        GetTaskAssignmentItemsResponse response = modelMapper.map(order, GetTaskAssignmentItemsResponse.class);
-//        LOG.info("TEST: ahhh response is {} ", response);
-//
-//        return response;
-//    }
-
     private GetTaskAssignmentItemsResponse makeGetOrderItemsResponse(TaskAssignment taskAssignment) {
         LOG.info("Mapping TaskAssignment to GetTaskAssignmentItemsResponse: {}", taskAssignment);
 

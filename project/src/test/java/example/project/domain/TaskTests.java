@@ -13,7 +13,7 @@ public class TaskTests {
     private Hours VALID_Hours = new Hours(1);
 
     @Test
-    @DisplayName("A new MenuItem is created with valid details")
+    @DisplayName("A new task is created with valid details")
     void test01(){
         assertDoesNotThrow(() -> {
             new Task(VALID_MENU_ITEM_ID,VALID_NAME, VALID_Hours);
@@ -22,7 +22,7 @@ public class TaskTests {
 
     //Note I had to add a validate id check to the Entity class constructor for this to work (missing previously)
     @Test
-    @DisplayName("A MenuItem will reject an invalid identity")
+    @DisplayName("A task will reject an invalid identity")
     void test02(){
         //Menu Item id is a long
         assertThrows(IllegalArgumentException.class, () -> {
@@ -31,7 +31,7 @@ public class TaskTests {
     }
 
     @Test
-    @DisplayName("A MenuItem will reject an invalid name")
+    @DisplayName("A task will reject an invalid name")
     void test03(){
         assertThrows(IllegalArgumentException.class, () -> {
             new Task(VALID_MENU_ITEM_ID,"", VALID_Hours);
@@ -40,7 +40,7 @@ public class TaskTests {
 
     //Note I had to add a validate menuItems check to the MenuItems class constructor for this to work (missing previously)
     @Test
-    @DisplayName("A MenuItem will reject an invalid Money value")
+    @DisplayName("A task will reject an invalid Money value")
     void test04(){
         assertThrows(IllegalArgumentException.class, () -> {
             new Task(VALID_MENU_ITEM_ID,VALID_NAME,null);

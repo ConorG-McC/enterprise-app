@@ -7,13 +7,13 @@ import example.project.domain.Task;
 
 import java.io.IOException;
 
-public class MenuItemCustomSerializer extends JsonSerializer<Task> {
+public class TaskCustomSerializer extends JsonSerializer<Task> {
     @Override
     public void serialize(Task task, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
         jsonGenerator.writeStartObject();
         jsonGenerator.writeStringField("id", String.valueOf(task.id())); //convert long to String
         jsonGenerator.writeStringField("name", task.name());
-        jsonGenerator.writeNumberField("price", task.hours().asBigDecimal());
+        jsonGenerator.writeNumberField("hours", task.hours().asBigDecimal());
         jsonGenerator.writeEndObject();
     }
 }

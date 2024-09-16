@@ -1,14 +1,17 @@
 package example.project.domain;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import example.common.domain.Hours;
 import example.common.domain.ValueObject;
 import example.project.api.BaseTask;
+import example.project.api.events.TaskCustomSerializer;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @EqualsAndHashCode(callSuper = false)
 @Setter
+@JsonSerialize(using = TaskCustomSerializer.class)
 @NoArgsConstructor
 public class Task extends ValueObject implements BaseTask { //BaseMenuItem (lives in api to avoid coupling to domain
     private long id;
