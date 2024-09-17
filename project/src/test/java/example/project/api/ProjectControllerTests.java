@@ -1,11 +1,14 @@
 package example.project.api;
 
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import example.common.domain.Hours;
 import example.project.application.IdentityService;
 import example.project.application.ProjectApplicationService;
+import example.project.application.ProjectDomainException;
 import example.project.application.ProjectQueryHandler;
-import example.project.infrastructure.Task;
-import example.project.infrastructure.Project;
+import example.project.domain.Task;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,46 +18,36 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.equalTo;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-//Project api requires a valid identity for any request to work
 public class ProjectControllerTests {
-    private String API_BASE_URL = "http://localhost:8901/project/";
-    private String MOCK_ADMIN_TOKEN = "Admin";
-    private String VALID_PROJECT_ID = "1234";
+
+    private static final String API_BASE_URL = "/project/";
+    private static final String MOCK_ADMIN_TOKEN = "Admin";
+    private static final String MOCK_USER_TOKEN = "User";
+    private static final String INVALID_TOKEN = "invalid-token";
+    private static final String VALID_PROJECT_ID = "1234";
+    private static final String VALID_PROJECT_NAME = "project";
+    private static final String NON_EXISTENT_PROJECT_ID = "non-existent-id";
 
     private MockMvc mockMvc;
     private ProjectQueryHandler projectQueryHandler;
     private ProjectApplicationService projectApplicationService;
     private IdentityService identityService;
-
-    private Project createValidProjectWithTasks(){
-        List<BaseTask> tasks = new ArrayList<>();
-        //Need to use the factory method (not constructor)
-        Project project =  Project.projectOf(VALID_PROJECT_ID,"project name");
-        project.addTask(createValidTask());
-        return project;
-    }
-
-    private Task createValidTask(){
-        Task newTask = new Task();
-        newTask.setId(1L);
-        newTask.setName("New Item");
-        newTask.setHours(1.5);
-        return newTask;
-    }
+    private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
@@ -62,88 +55,279 @@ public class ProjectControllerTests {
         projectApplicationService = mock(ProjectApplicationService.class);
         identityService = mock(IdentityService.class);
 
+        // Initialize and configure the ObjectMapper
+        objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new Jdk8Module());
+        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+
         ProjectController projectController = new ProjectController(projectQueryHandler, projectApplicationService, identityService);
-        mockMvc = MockMvcBuilders.standaloneSetup(projectController)
-                                .build();
+        mockMvc = MockMvcBuilders.standaloneSetup(projectController).build();
+    }
+
+    private example.project.infrastructure.Project createValidProjectWithTasks() {
+        example.project.infrastructure.Project project = example.project.infrastructure.Project.projectOf(VALID_PROJECT_ID, VALID_PROJECT_NAME);
+        project.addTask(createValidTask());
+        return project;
+    }
+
+    private example.project.infrastructure.Task createValidTask() {
+        example.project.infrastructure.Task newTask = new example.project.infrastructure.Task();
+        newTask.setId(1L);
+        newTask.setName("New Item");
+        newTask.setHours(1.5);
+        return newTask;
     }
 
     @Test
-    @DisplayName("Pass a valid project id to view a particular project's details, display the response in JSON")
-    void test01() throws Exception {
-        //Return type from ProjectQueryHandler for getProject is GetProjectResponse
+    @DisplayName("When a valid admin token and project ID are provided, then the project details are returned")
+    void whenValidAdminTokenAndProjectIdProvided_thenProjectDetailsAreReturned() throws Exception {
+        // Prepare mock response
         GetProjectResponse projectResponse = new GetProjectResponse();
         projectResponse.setProjectId(VALID_PROJECT_ID);
-        projectResponse.setName("project");
-        //mock behaviour
+        projectResponse.setName(VALID_PROJECT_NAME);
+
+        // Mock behavior
         when(identityService.isAdmin(MOCK_ADMIN_TOKEN)).thenReturn(true);
         when(projectQueryHandler.getProject(VALID_PROJECT_ID)).thenReturn(Optional.of(projectResponse));
 
-        //Check the format in generated_requests to ensure the json path keys are correct
-        mockMvc.perform(get(API_BASE_URL.concat(VALID_PROJECT_ID))
+        // Perform the GET request
+        mockMvc.perform(get(API_BASE_URL + VALID_PROJECT_ID)
                         .header("Authorization", MOCK_ADMIN_TOKEN))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("projectId").value(projectResponse.getProjectId()))
-                .andExpect(jsonPath("name", equalTo(projectResponse.getName()))
-                );
+                .andExpect(jsonPath("name", equalTo(projectResponse.getName())));
     }
 
     @Test
-    @DisplayName("View all projects and display the response in JSON when a valid project id is submitted")
-    void test02() throws Exception {
-        //Return type from ProjectQueryHandler for getAllProjects is Iterable<BaseProject>
+    @DisplayName("When a valid admin token is provided but project ID does not exist, then a 404 status is returned")
+    void whenValidAdminTokenButProjectIdDoesNotExist_thenNotFoundIsReturned() throws Exception {
+        // Mock behavior
+        when(identityService.isAdmin(MOCK_ADMIN_TOKEN)).thenReturn(true);
+        when(projectQueryHandler.getProject(NON_EXISTENT_PROJECT_ID)).thenReturn(Optional.empty());
+
+        // Perform the GET request
+        mockMvc.perform(get(API_BASE_URL + NON_EXISTENT_PROJECT_ID)
+                        .header("Authorization", MOCK_ADMIN_TOKEN))
+                .andDo(print())
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("When a valid admin token is provided, then all projects are returned")
+    void whenValidAdminTokenProvided_thenAllProjectsAreReturned() throws Exception {
+        // Prepare mock response
         BaseProject project = createValidProjectWithTasks();
         List<BaseProject> projects = new ArrayList<>();
         projects.add(project);
-        //mock behaviour
-        when(identityService.isAdmin(MOCK_ADMIN_TOKEN)).thenReturn(true);
-        when(projectQueryHandler.getAllProjects()).thenReturn(List.of(project));
 
-        //Check the format in generated_requests to ensure the json path keys are correct
-        mockMvc.perform(get(API_BASE_URL.concat("all"))
+        // Mock behavior
+        when(identityService.isAdmin(MOCK_ADMIN_TOKEN)).thenReturn(true);
+        when(projectQueryHandler.getAllProjects()).thenReturn(projects);
+
+        // Perform the GET request
+        mockMvc.perform(get(API_BASE_URL + "all")
                         .header("Authorization", MOCK_ADMIN_TOKEN))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$[0].id").value(project.getId()))
                 .andExpect(jsonPath("$[0].name", equalTo(project.getName())))
-                //expected 1L was 1 (so need to cast from long to int
                 .andExpect(jsonPath("$[0].tasks[0].id", equalTo((int) project.getTasks().get(0).getId())))
                 .andExpect(jsonPath("$[0].tasks[0].name", equalTo(project.getTasks().get(0).getName())))
-                .andExpect(jsonPath("$[0].tasks[0].hours", equalTo(project.getTasks().get(0).getHours()))
-                );
+                .andExpect(jsonPath("$[0].tasks[0].hours", equalTo(project.getTasks().get(0).getHours())));
     }
 
     @Test
-    @DisplayName("Pass a valid project id to view a particular project's menu items, display the response in JSON")
-    void test03() throws Exception {
-        //Return type from ProjectQueryHandler for getProjectMenu is GetProjectMenuResponse
-        GetProjectTaskResponse projectMenuResponse = new GetProjectTaskResponse();
-        projectMenuResponse.setProjectId(VALID_PROJECT_ID);
-        projectMenuResponse.setName("project");
-        projectMenuResponse.setTasks(List.of(createValidTask()));
-        //mock behaviour
-        when(identityService.isAdmin(MOCK_ADMIN_TOKEN)).thenReturn(true);
-        when(projectQueryHandler.getProjectTasks(VALID_PROJECT_ID)).thenReturn(Optional.of(projectMenuResponse));
+    @DisplayName("When an invalid token is provided, then viewing all projects is unauthorized")
+    void whenInvalidTokenProvided_thenViewingAllProjectsIsUnauthorized() throws Exception {
+        // Mock behavior
+        when(identityService.isAdmin(INVALID_TOKEN)).thenReturn(false);
 
-        //Check the format in generated_requests to ensure the json path keys are correct
-        mockMvc.perform(get(API_BASE_URL.concat("task/" + VALID_PROJECT_ID))
+        // Perform the GET request
+        mockMvc.perform(get(API_BASE_URL + "all")
+                        .header("Authorization", INVALID_TOKEN))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("user not authorised"));
+    }
+
+    @Test
+    @DisplayName("When a valid admin token and project ID are provided, then project tasks are returned")
+    void whenValidAdminTokenAndProjectIdProvided_thenProjectTasksAreReturned() throws Exception {
+        // Prepare mock response
+        GetProjectTaskResponse projectTaskResponse = new GetProjectTaskResponse();
+        projectTaskResponse.setProjectId(VALID_PROJECT_ID);
+        projectTaskResponse.setName(VALID_PROJECT_NAME);
+        projectTaskResponse.setTasks(List.of(createValidTask()));
+
+        // Mock behavior
+        when(identityService.isAdmin(MOCK_ADMIN_TOKEN)).thenReturn(true);
+        when(projectQueryHandler.getProjectTasks(VALID_PROJECT_ID)).thenReturn(Optional.of(projectTaskResponse));
+
+        // Perform the GET request
+        mockMvc.perform(get(API_BASE_URL + "task/" + VALID_PROJECT_ID)
                         .header("Authorization", MOCK_ADMIN_TOKEN))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("projectId").value(projectMenuResponse.getProjectId()))
-                .andExpect(jsonPath("name", equalTo(projectMenuResponse.getName())))
-                //expected 1L was 1 (so need to cast from long to int
-                .andExpect(jsonPath("tasks[0].id", equalTo((int) projectMenuResponse.getTasks().get(0).getId())))
-                .andExpect(jsonPath("tasks[0].name", equalTo(projectMenuResponse.getTasks().get(0).getName())))
-                .andExpect(jsonPath("tasks[0].hours", equalTo(projectMenuResponse.getTasks().get(0).getHours()))
-                );
+                .andExpect(jsonPath("projectId").value(projectTaskResponse.getProjectId()))
+                .andExpect(jsonPath("name", equalTo(projectTaskResponse.getName())))
+                .andExpect(jsonPath("tasks[0].id", equalTo((int) projectTaskResponse.getTasks().get(0).getId())))
+                .andExpect(jsonPath("tasks[0].name", equalTo(projectTaskResponse.getTasks().get(0).getName())))
+                .andExpect(jsonPath("tasks[0].hours", equalTo(projectTaskResponse.getTasks().get(0).getHours())));
     }
 
-    //to be added - post request to add a project (with command details)
-    //invalid requests to each end point
-    // TODO - Add tests for the post request to add a project and tasks
-    // TODO - Add tests for invalid scenarios of each endpoint
+    @Test
+    @DisplayName("When an invalid token is provided, then viewing project tasks is unauthorized")
+    void whenInvalidTokenProvided_thenViewingProjectTasksIsUnauthorized() throws Exception {
+        // Mock behavior
+        when(identityService.isAdmin(INVALID_TOKEN)).thenReturn(false);
+        when(identityService.isSpecifiedUser(INVALID_TOKEN, VALID_PROJECT_ID)).thenReturn(false);
+
+        // Perform the GET request
+        mockMvc.perform(get(API_BASE_URL + "task/" + VALID_PROJECT_ID)
+                        .header("Authorization", INVALID_TOKEN))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("user not authorised"));
+    }
+
+    @Test
+    @DisplayName("When a valid admin token and valid command are provided, then a new project is created")
+    void whenValidAdminTokenAndValidCommandProvided_thenNewProjectIsCreated() throws Exception {
+        // Mock behavior
+        when(identityService.isAdmin(MOCK_ADMIN_TOKEN)).thenReturn(true);
+        when(projectApplicationService.createProjectWithTasks(any(CreateProjectCommand.class)))
+                .thenReturn(VALID_PROJECT_ID);
+
+        // Prepare the tasks
+        Task task1 = new Task(1L, "Task 1", new Hours(BigDecimal.valueOf(2.0)));
+        Task task2 = new Task(2L, "Task 2", new Hours(BigDecimal.valueOf(3.0)));
+
+        // Prepare the command
+        CreateProjectCommand command = new CreateProjectCommand(
+                "New Project",
+                List.of(task1, task2)
+        );
+
+        // Serialize the command
+        String jsonMessage = objectMapper.writeValueAsString(command);
+
+        // Perform the POST request
+        mockMvc.perform(post(API_BASE_URL)
+                        .header("Authorization", MOCK_ADMIN_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonMessage))
+                .andDo(print())
+                .andExpect(status().isCreated())
+                .andExpect(content().string(VALID_PROJECT_ID));
+    }
+
+    @Test
+    @DisplayName("When no Authorization header is provided, then creating a project is unauthorized")
+    void whenNoAuthorizationHeaderProvided_thenCreatingProjectIsUnauthorized() throws Exception {
+        // Prepare the tasks
+        Task task1 = new Task(1L, "Task 1", new Hours(BigDecimal.valueOf(2.0)));
+
+        // Prepare the command
+        CreateProjectCommand command = new CreateProjectCommand(
+                "New Project",
+                List.of(task1)
+        );
+
+        // Serialize the command
+        String jsonMessage = objectMapper.writeValueAsString(command);
+
+        // Perform the POST request without the Authorization header
+        mockMvc.perform(post(API_BASE_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonMessage))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("When an invalid admin token is provided, then creating a project is unauthorized")
+    void whenInvalidAdminTokenProvided_thenCreatingProjectIsUnauthorized() throws Exception {
+        // Mock behavior
+        when(identityService.isAdmin(MOCK_USER_TOKEN)).thenReturn(false);
+
+        // Prepare the tasks
+        Task task1 = new Task(1L, "Task 1", new Hours(BigDecimal.valueOf(2.0)));
+
+        // Prepare the command
+        CreateProjectCommand command = new CreateProjectCommand(
+                "New Project",
+                List.of(task1)
+        );
+
+        // Serialize the command
+        String jsonMessage = objectMapper.writeValueAsString(command);
+
+        // Perform the POST request with an invalid token
+        mockMvc.perform(post(API_BASE_URL)
+                        .header("Authorization", MOCK_USER_TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonMessage))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("user not authorised"));
+    }
+
+    @Test
+    @DisplayName("When a valid admin token and existing project ID are provided, then the project is deleted")
+    void whenValidAdminTokenAndProjectIdProvided_thenProjectIsDeleted() throws Exception {
+        // Mock behavior
+        when(identityService.isAdmin(MOCK_ADMIN_TOKEN)).thenReturn(true);
+        when(projectApplicationService.deleteProjectById(VALID_PROJECT_ID))
+                .thenReturn("Project with id " + VALID_PROJECT_ID + " deleted");
+
+        // Perform the DELETE request
+        mockMvc.perform(delete(API_BASE_URL + VALID_PROJECT_ID)
+                        .header("Authorization", MOCK_ADMIN_TOKEN))
+                .andDo(print())
+                .andExpect(status().isGone())
+                .andExpect(content().string("Project with id " + VALID_PROJECT_ID + " deleted"));
+    }
+
+    @Test
+    @DisplayName("When no Authorization header is provided, then deleting a project is unauthorized")
+    void whenNoAuthorizationHeaderProvided_thenDeletingProjectIsUnauthorized() throws Exception {
+        // Perform the DELETE request without the Authorization header
+        mockMvc.perform(delete(API_BASE_URL + VALID_PROJECT_ID))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("When an invalid admin token is provided, then deleting a project is unauthorized")
+    void whenInvalidAdminTokenProvided_thenDeletingProjectIsUnauthorized() throws Exception {
+        // Mock behavior
+        when(identityService.isAdmin(MOCK_USER_TOKEN)).thenReturn(false);
+
+        // Perform the DELETE request with an invalid token
+        mockMvc.perform(delete(API_BASE_URL + VALID_PROJECT_ID)
+                        .header("Authorization", MOCK_USER_TOKEN))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(content().string("user not authorised"));
+    }
+
+    @Test
+    @DisplayName("When a valid admin token is provided but project does not exist, then a 400 status is returned")
+    void whenValidAdminTokenButProjectDoesNotExist_thenBadRequestIsReturned() throws Exception {
+        // Mock behavior
+        when(identityService.isAdmin(MOCK_ADMIN_TOKEN)).thenReturn(true);
+        when(projectApplicationService.deleteProjectById(NON_EXISTENT_PROJECT_ID))
+                .thenThrow(new ProjectDomainException("Project not found with id " + NON_EXISTENT_PROJECT_ID));
+
+        // Perform the DELETE request
+        mockMvc.perform(delete(API_BASE_URL + NON_EXISTENT_PROJECT_ID)
+                        .header("Authorization", MOCK_ADMIN_TOKEN))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(status().reason("Unable to delete project: Project not found with id " + NON_EXISTENT_PROJECT_ID));
+    }
 }

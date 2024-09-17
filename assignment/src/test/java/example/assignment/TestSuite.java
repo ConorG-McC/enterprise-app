@@ -1,12 +1,14 @@
 package example.assignment;
 
-import example.assignment.ordering.ordering.DeliveryTests;
-import example.assignment.ordering.ordering.PaymentInformationTests;
+import example.assignment.api.ProjectControllerTest;
+import example.assignment.domain.ProjectTests;
+import example.assignment.domain.TaskTests;
 import org.junit.platform.suite.api.SelectClasses;
 import org.junit.platform.suite.api.Suite;
 
 @Suite
-@SelectClasses( {DeliveryTests.class,
-                PaymentInformationTests.class})
+@SelectClasses( {ProjectControllerTest.class,
+                TaskTests.class,
+                ProjectTests.class})
 public class TestSuite {
 }
