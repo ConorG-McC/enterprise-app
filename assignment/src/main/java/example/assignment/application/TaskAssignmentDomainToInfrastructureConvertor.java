@@ -14,7 +14,7 @@ public class TaskAssignmentDomainToInfrastructureConvertor {
 
         //Convert all menu items to entities
         for (TaskAssignmentLineItem taskAssignmentLineItem : taskAssignment.taskAssignmentLineItems()) {
-            o.addOrderItem(new AssignedTaskItem(taskAssignmentLineItem.id(),
+            o.addAssignmentTaskItem(new AssignedTaskItem(taskAssignmentLineItem.id(),
                                                                             taskAssignmentLineItem.taskId(),
                                                                             taskAssignmentLineItem.name(),
                                                                             taskAssignmentLineItem.hours().asBigDecimal(),

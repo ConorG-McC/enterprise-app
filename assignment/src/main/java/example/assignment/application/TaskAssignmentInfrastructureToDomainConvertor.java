@@ -21,7 +21,7 @@ public class TaskAssignmentInfrastructureToDomainConvertor {
         }
 
 
-        return example.assignment.domain.TaskAssignment.createOrder(new Identity(ta.getId()),
+        return example.assignment.domain.TaskAssignment.createAssignment(new Identity(ta.getId()),
                                     ta.getConsumer_id(),
                                     project,
                                     orderItems);

@@ -1,0 +1,156 @@
+@startuml
+
+!theme plain
+top to bottom direction
+skinparam linetype ortho
+
+' Include the legend (key) at the top left
+legend top left
+|= **Symbol** |= **Meaning** |
+| <&interface> **Interface** | Interface |
+| <&enumeration> **Enumeration** | Enumeration (Enum) |
+| [#000082,plain]-^ | Generalization (Inheritance) |
+| [#008200,dashed]-^ | Realization (Interface Implementation) |
+| [#595959,dashed]-> | Dependency |
+| [#595959,plain]-> | Association |
+| [*] **Multiplicity** | Multiplicity Indicator |
+||
+|= **Visibility Indicators** |= **Description** |
+| `+` (plus sign) | Public member |
+| `-` (minus sign) | Private member |
+| `#` (hash sign) | Protected member |
+| `~` (tilde) | Package-private member |
+||
+| **Constructor Notation** | |
+| `<<Create>>` | Constructor method |
+||
+| **Property Indicators** | |
+| Underlined | Static member |
+| *Italicized* | Abstract member |
+endlegend
+
+' Define packages and include classes within them
+
+package "example.common.domain" {
+    class UniqueIDFactory {
+        + {static} Identity createID()
+    }
+
+    abstract class AssertionConcern {
+        # <<Create>> AssertionConcern()
+        # void assertArgumentIsUUID(String)
+        # void assertArgumentLength(String,int,String)
+        # void assertArgumentLength(String,int,int,String)
+        # void assertValueIsBetween(Long,Long,Long,String)
+        # void assertValueIsGreaterThan(BigDecimal,BigDecimal,String)
+        # void assertArgumentNotEmpty(Object,String)
+    }
+
+    abstract class IdentifiedValueObject {
+        - long id
+        + long id()
+    }
+
+    abstract class Entity {
+        # Optional<AggregateEvent> event
+        # Identity id
+        # <<Create>> Entity(Identity)
+        + boolean equals(Object)
+        + Identity id()
+    }
+
+    class Hours {
+        + {static} Hours ZERO
+        - BigDecimal amount
+        + <<Create>> Hours(BigDecimal)
+        + <<Create>> Hours(String)
+        + <<Create>> Hours(int)
+        + <<Create>> Hours(Hours)
+        + boolean equals(Object)
+        + int hashCode()
+        + String toString()
+        + Hours add(Hours)
+        + boolean isGreaterThanOrEqual(Hours)
+        + BigDecimal asBigDecimal()
+        + double asDouble()
+        + String asString()
+        + Hours multiply(int)
+    }
+
+    class ValueObject {
+    }
+
+    class Identity {
+        # String id
+        + <<Create>> Identity(String)
+        - void setID(String)
+        + String toString()
+        + String id()
+    }
+
+    abstract class AggregateEvent {
+        - Logger LOG
+        + String toJson()
+    }
+}
+
+package "example.common.infrastructure" {
+    class Role {
+        - long id
+        - String type
+        + String toString()
+    }
+
+    class AppUser {
+        + {static} String EMAIL
+        + {static} String FIRST_NAME
+        + {static} String PASSWORD
+        + {static} String ROLE
+        + {static} String SURNAME
+        + {static} String USERNAME
+        + {static} String ID
+        - String userUUID
+        - String userName
+        - String password
+        - String email
+        - String firstName
+        - String surname
+        - Role role
+        + String toString()
+    }
+
+    class RoleCustomSerializer {
+        + void serialize(Role,JsonGenerator,SerializerProvider)
+    }
+}
+
+package "example.common.application" {
+    class JwtTokenUtil {
+        + {static} long JWT_TOKEN_VALIDITY
+        - String secret
+        + String generateToken(AppUser)
+        - String tokenFactory(Map<String,Object>,String)
+        + Date getExpirationDateFromToken(String)
+        + T getClaimFromToken(String,Function<Claims,T>)
+        - Claims getAllClaimsFromToken(String)
+        + Boolean isTokenExpired(String)
+        + String getClaimFromToken(String,String)
+        - SecretKey getSigningKey()
+    }
+}
+
+' Define relationships between classes
+
+example.common.infrastructure.AppUser                 "1" *-[#595959,plain]-> "role\n1" example.common.infrastructure.Role
+example.common.domain.Entity                          -[#595959,dashed]->  example.common.domain.AggregateEvent
+example.common.domain.Entity                          -[#000082,plain]-^  example.common.domain.AssertionConcern
+example.common.domain.Entity                         "1" *-[#595959,plain]-> "id\n1" example.common.domain.Identity
+example.common.domain.Hours                          "1" *-[#595959,plain]-> "ZERO\n1" example.common.domain.Hours
+example.common.domain.Hours                           -[#000082,plain]-^  example.common.domain.ValueObject
+example.common.domain.IdentifiedValueObject           -[#000082,plain]-^  example.common.domain.AssertionConcern
+example.common.domain.Identity                        -[#000082,plain]-^  example.common.domain.ValueObject
+example.common.domain.ValueObject                     -[#000082,plain]-^  example.common.domain.AssertionConcern
+
+com.fasterxml.jackson.databind.JsonSerializer         <|-- example.common.infrastructure.RoleCustomSerializer
+
+@enduml

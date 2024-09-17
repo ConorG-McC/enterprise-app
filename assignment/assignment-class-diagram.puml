@@ -1,0 +1,651 @@
+@startuml
+
+!theme plain
+top to bottom direction
+skinparam linetype ortho
+
+' Include the legend (key) at the top left
+legend top left
+|= **Symbol** |= **Meaning** |
+| <&interface> **Interface** | Interface |
+| <&enumeration> **Enumeration** | Enumeration (Enum) |
+| [#000082,plain]-^ | Generalization (Inheritance) |
+| [#008200,dashed]-^ | Realization (Interface Implementation) |
+| [#595959,dashed]-> | Dependency |
+| [#595959,plain]-> | Association |
+| [*] **Multiplicity** | Multiplicity Indicator |
+||
+|= **Visibility Indicators** |= **Description** |
+| `+` (plus sign) | Public member |
+| `-` (minus sign) | Private member |
+| `#` (hash sign) | Protected member |
+| `~` (tilde) | Package-private member |
+||
+| **Constructor Notation** | |
+| `<<Create>>` | Constructor method |
+||
+| **Property Indicators** | |
+| Underlined | Static member |
+| *Italicized* | Abstract member |
+endlegend
+
+' Define packages and include classes within them
+
+package "example.assignment.api" {
+    class AddNewAssignmentCommand {
+      + AddNewAssignmentCommand(String, String, List<TaskAssignmentLineItem>):
+      ~ consumerId: String
+      ~ projectId: String
+      ~ taskAssignmentLineItems: List<TaskAssignmentLineItem>
+      + toString(): String
+       consumerId: String
+       taskAssignmentLineItems: List<TaskAssignmentLineItem>
+       projectId: String
+    }
+
+    class AssignmentController {
+      + AssignmentController(TaskAssignmentQueryHandler, TaskAssignmentApplicationService):
+      + addAssignment(AddNewAssignmentCommand): HttpStatus
+      + cancelAssignment(String): HttpStatus
+      + getAssignmentSummary(String): ResponseEntity<GetTaskAssignmentSummaryResponse>
+      + getAssignmentTasks(String): ResponseEntity<GetTaskAssignmentItemsResponse>
+    }
+
+    interface BaseAssignedTaskItemValueObject << interface >> {
+       task_name: String
+       task_estimated_hours: BigDecimal
+       task_id: long
+    }
+
+    interface BaseProject << interface >> {
+      + addTask(Task): void
+       name: String
+       id: String
+       tasks: List<Task>
+    }
+
+    interface BaseTask << interface >> {
+      + id(): long
+      + name(): String
+      + hours(): Hours
+    }
+
+    interface BaseTaskAssignment << interface >> {
+       project_id: String
+       assignedTaskItem: List<AssignedTaskItem>
+       consumer_id: String
+       id: String
+       task_state: int
+    }
+
+    interface BaseTaskValueObject << interface >> {
+       hours: double
+       name: String
+       id: long
+       project_id: String
+    }
+
+    class GetProjectResponse {
+      + GetProjectResponse():
+      - name: String
+      - projectId: String
+       name: String
+       projectId: String
+    }
+
+    class GetProjectTaskResponse {
+      + GetProjectTaskResponse():
+      - name: String
+      - tasks: List<BaseTaskValueObject>
+      - projectId: String
+       name: String
+       projectId: String
+       tasks: List<BaseTaskValueObject>
+    }
+
+    class GetTaskAssignmentItemsResponse {
+      + GetTaskAssignmentItemsResponse(List<BaseAssignedTaskItemValueObject>):
+      - assignedTaskItems: List<BaseAssignedTaskItemValueObject>
+      # canEqual(Object): boolean
+      + equals(Object): boolean
+      + hashCode(): int
+       assignedTaskItems: List<BaseAssignedTaskItemValueObject>
+    }
+
+    class GetTaskAssignmentSummaryResponse {
+      + GetTaskAssignmentSummaryResponse(String, String):
+      - id: String
+      - task_state: String
+      # canEqual(Object): boolean
+      + hashCode(): int
+      + equals(Object): boolean
+       id: String
+       task_state: String
+    }
+
+    class ProjectController {
+      + ProjectController(ProjectQueryHandler):
+      + findById(String): ResponseEntity<?>
+      + findTasksByProjectId(String): ResponseEntity<?>
+      + findAll(String): ResponseEntity<?>
+    }
+}
+
+package "example.assignment.api.events" {
+    class DeleteProjectListener {
+      + DeleteProjectListener(ProjectApplicationService):
+      + receiver(String): void
+    }
+
+    class NewProjectCreatedListener {
+      + NewProjectCreatedListener(ProjectApplicationService):
+      + receiver(String): void
+    }
+
+    class ProjectCreatedEvent {
+      + ProjectCreatedEvent():
+      + ProjectCreatedEvent(String, String, List<BaseTask>):
+      - projectName: String
+      - tasks: List<BaseTask>
+      - aggregateID: String
+       aggregateID: String
+       projectName: String
+       tasks: List<BaseTask>
+    }
+
+    class RabbitMQConfig {
+      + RabbitMQConfig():
+      + rabbitTemplate(ConnectionFactory): RabbitTemplate
+      + jsonMessageConverter(): MessageConverter
+      ~ eventListenerContainer(): SimpleRabbitListenerContainerFactory
+       connection: ConnectionFactory
+    }
+
+    class TaskDeserializer {
+      + TaskDeserializer():
+      + deserialize(JsonParser, DeserializationContext): BaseTask
+    }
+
+    enum TaskState << enumeration >> {
+      - TaskState():
+      + values(): TaskState[]
+      + valueOf(String): TaskState
+    }
+}
+
+package "example.assignment.application" {
+    class ProjectApplicationService {
+      + ProjectApplicationService(ProjectRepository):
+      + createProjectWithTasks(ProjectCreatedEvent): void
+      + deleteProjectById(String): String
+    }
+
+    class ProjectDomainToInfrastructureConvertor {
+      + ProjectDomainToInfrastructureConvertor():
+      + convert(Project): BaseProject
+    }
+
+    class ProjectInfrastructureToDomainConvertor {
+      + ProjectInfrastructureToDomainConvertor():
+      + convert(BaseProject): Project
+    }
+
+    class ProjectQueryHandler {
+      + ProjectQueryHandler(ProjectRepository):
+      + getProject(String): Optional<GetProjectResponse>
+      + getProjectTasks(String): Optional<GetProjectTaskResponse>
+       allProjects: Iterable<BaseProject>
+    }
+
+    class TaskAssignmentApplicationService {
+      + TaskAssignmentApplicationService(TaskAssignmentRepository, ProjectRepository):
+      - findProject(String): Project
+      + addNewAssignment(AddNewAssignmentCommand): void
+      + cancelAssignment(String): void
+    }
+
+    class TaskAssignmentDomainToInfrastructureConvertor {
+      + TaskAssignmentDomainToInfrastructureConvertor():
+      + convert(TaskAssignment): BaseTaskAssignment
+    }
+
+    class TaskAssignmentInfrastructureToDomainConvertor {
+      + TaskAssignmentInfrastructureToDomainConvertor():
+      + convert(TaskAssignment, Project): TaskAssignment
+    }
+
+    class TaskAssignmentQueryHandler {
+      + TaskAssignmentQueryHandler(TaskAssignmentRepository):
+      + getAssignmentSummary(String): Optional<GetTaskAssignmentSummaryResponse>
+      + getAssignedTaskItems(String): Optional<GetTaskAssignmentItemsResponse>
+      - makeGetAssignmentSummaryResponse(TaskAssignment): GetTaskAssignmentSummaryResponse
+      - makeGetAssignmentTasksResponse(TaskAssignment): GetTaskAssignmentItemsResponse
+    }
+}
+
+package "example.assignment.domain" {
+    class Project {
+      + Project(Identity, String, List<BaseTask>):
+      - tasks: List<BaseTask>
+      - name: String
+      + name(): String
+      + toString(): String
+      + findTask(long): boolean
+      + tasks(): List<BaseTask>
+      + projectOf(Identity, String, List<BaseTask>): Project
+       name: String
+       tasks: List<BaseTask>
+    }
+
+    class Task {
+      + Task(long, String, Hours):
+      + Task():
+      - hours: Hours
+      - id: long
+      - name: String
+      # canEqual(Object): boolean
+      + hours(): Hours
+      + toString(): String
+      + equals(Object): boolean
+      + id(): long
+      + name(): String
+      + hashCode(): int
+       name: String
+       hours: Hours
+       id: long
+    }
+
+    class TaskAssignment {
+      + TaskAssignment(Identity, String, String, List<TaskAssignmentLineItem>):
+      - projectId: String
+      - consumerId: String
+      + projectId(): String
+      + state(): TaskState
+      ~ findTaskAssignmentItem(long): TaskAssignmentLineItem
+      + toString(): String
+      + cancelOAssignment(): void
+      + consumerId(): String
+      + createAssignment(Identity, String, Project, List<TaskAssignmentLineItem>): TaskAssignment
+      + taskAssignmentLineItems(): List<TaskAssignmentLineItem>
+       consumerId: String
+       projectId: String
+    }
+
+    class TaskAssignmentLineItem {
+      + TaskAssignmentLineItem(long, String, Hours):
+      - taskId: long
+      - taskName: String
+      - hours: Hours
+      + hours(): Hours
+      + toString(): String
+      + equals(Object): boolean
+      # canEqual(Object): boolean
+      + hashCode(): int
+      + taskId(): long
+      + name(): String
+       hours: Hours
+       taskId: long
+       taskName: String
+    }
+}
+
+package "example.assignment.infrastructure" {
+    class AssignedTaskItem {
+      + AssignedTaskItem():
+      + AssignedTaskItem(long, long, String, BigDecimal, String):
+      - task_id: long
+      - task_estimated_hours: BigDecimal
+      - task_assignment_id: String
+      - task_name: String
+      - assigned_task_id: long
+      + toString(): String
+       task_assignment_id: String
+       assigned_task_id: long
+       task_name: String
+       task_estimated_hours: BigDecimal
+       task_id: long
+    }
+
+    class Project {
+      # Project():
+      # Project(String, String):
+      - tasks: List<Task>
+      - name: String
+      - id: String
+      + toString(): String
+      + addTask(Task): void
+      + projectOf(String, String): Project
+       name: String
+       id: String
+       tasks: List<Task>
+    }
+
+    interface ProjectRepository << interface >> {
+      + save(BaseProject): BaseProject
+      + findAllProjects(): Iterable<BaseProject>
+      + findByName(String): Optional<BaseProject>
+    }
+
+    class Task {
+      + Task():
+      + Task(long, String, double, String):
+      - hours: double
+      - id: long
+      - project_id: String
+      - name: String
+      + toString(): String
+       hours: double
+       name: String
+       id: long
+       project_id: String
+    }
+
+    class TaskAssignment {
+      # TaskAssignment():
+      # TaskAssignment(String, String, String, int):
+      - task_state: int
+      - consumer_id: String
+      - id: String
+      - project_id: String
+      - assignedTaskItem: List<AssignedTaskItem>
+      + toString(): String
+      + taskAssignmentOf(String, String, String, int): TaskAssignment
+      + addAssignmentTaskItem(AssignedTaskItem): void
+       project_id: String
+       assignedTaskItem: List<AssignedTaskItem>
+       consumer_id: String
+       id: String
+       task_state: int
+    }
+
+    interface TaskAssignmentRepository << interface >> {
+      + save(BaseTaskAssignment): BaseTaskAssignment
+    }
+}
+
+package "example.common.domain" {
+    class AggregateEvent {
+      + AggregateEvent():
+      + toJson(): String
+    }
+
+    class AssertionConcern {
+      # AssertionConcern():
+      # assertArgumentIsUUID(String): void
+      # assertValueIsBetween(Long, Long, Long, String): void
+      # assertArgumentNotEmpty(Object, String): void
+      # assertArgumentLength(String, int, String): void
+      # assertValueIsGreaterThan(BigDecimal, BigDecimal, String): void
+      # assertArgumentLength(String, int, int, String): void
+    }
+
+    class Entity {
+      # Entity(Identity):
+      # event: Optional<AggregateEvent>
+      + equals(Object): boolean
+      + id(): Identity
+       event: Optional<AggregateEvent>
+    }
+
+    class Hours {
+      + Hours(int):
+      + Hours(String):
+      + Hours(Hours):
+      + Hours(BigDecimal):
+      + add(Hours): Hours
+      + equals(Object): boolean
+      + multiply(int): Hours
+      + asDouble(): double
+      + hashCode(): int
+      + toString(): String
+      + isGreaterThanOrEqual(Hours): boolean
+      + asString(): String
+      + asBigDecimal(): BigDecimal
+    }
+
+    class IdentifiedValueObject {
+      + IdentifiedValueObject():
+      - id: long
+      + id(): long
+       id: long
+    }
+
+    class Identity {
+      + Identity(String):
+      + id(): String
+      + toString(): String
+       ID: String
+    }
+
+    class UniqueIDFactory {
+      + UniqueIDFactory():
+      + createID(): Identity
+    }
+
+    class ValueObject {
+      + ValueObject():
+    }
+}
+
+package "example.common.application" {
+    class JwtTokenUtil {
+      + JwtTokenUtil():
+      + getClaimFromToken(String, Function<Claims, T>): T
+      + getClaimFromToken(String, String): String
+      - tokenFactory(Map<String, Object>, String): String
+      + generateToken(AppUser): String
+      + getExpirationDateFromToken(String): Date
+      - getAllClaimsFromToken(String): Claims
+      + isTokenExpired(String): Boolean
+       signingKey: SecretKey
+    }
+}
+
+package "example.common.infrastructure" {
+    class AppUser {
+      + AppUser():
+      - password: String
+      - userUUID: String
+      - userName: String
+      - role: Role
+      - email: String
+      - firstName: String
+      - surname: String
+      + toString(): String
+       userUUID: String
+       password: String
+       role: Role
+       email: String
+       userName: String
+       surname: String
+       firstName: String
+    }
+
+    class Role {
+      + Role():
+      - id: long
+      - type: String
+      + toString(): String
+       id: long
+       type: String
+    }
+
+    class RoleCustomSerializer {
+      + RoleCustomSerializer():
+      + serialize(Role, JsonGenerator, SerializerProvider): void
+    }
+}
+
+package "example.identity.api" {
+    class IdentityController {
+      + IdentityController(UserService):
+      + validate(UserDetailsRequest): ResponseEntity<?>
+    }
+
+    class UserDetailsRequest {
+      + UserDetailsRequest():
+      - username: String
+      - password: String
+      + toString(): String
+       password: String
+       username: String
+    }
+}
+
+package "example.identity.application" {
+    class UserService {
+      + UserService(UserRepository, JwtTokenUtil):
+      + authenticate(String, String): Optional<String>
+    }
+}
+
+package "example.identity.infrastructure" {
+    interface UserRepository << interface >> {
+      + findUserByUsernameAndPassword(String, String): Optional<AppUser>
+    }
+}
+
+package "example.assignment" {
+    class AssignmentApplication {
+      + AssignmentApplication():
+      + main(String[]): void
+    }
+}
+
+package "example.identity" {
+    class IdentityApplication {
+      + IdentityApplication():
+      + main(String[]): void
+    }
+}
+
+' Define relationships with fully qualified class names and include colors
+
+example.assignment.api.AddNewAssignmentCommand                       "1" *-[#595959,plain]-> "taskAssignmentLineItems\n*" example.assignment.domain.TaskAssignmentLineItem
+
+example.common.infrastructure.AppUser                                       "1" *-[#595959,plain]-> "role\n1" example.common.infrastructure.Role
+
+example.assignment.infrastructure.AssignedTaskItem                               -[#008200,dashed]-^  example.assignment.api.BaseAssignedTaskItemValueObject
+
+example.assignment.api.AssignmentController                           -[#595959,dashed]->  example.assignment.api.GetTaskAssignmentItemsResponse
+
+example.assignment.api.AssignmentController                           -[#595959,dashed]->  example.assignment.api.GetTaskAssignmentSummaryResponse
+
+example.assignment.api.AssignmentController                          "1" *-[#595959,plain]-> "taskAssignmentApplicationService\n1" example.assignment.application.TaskAssignmentApplicationService
+
+example.assignment.api.AssignmentController                          "1" *-[#595959,plain]-> "assignmentsQueryHandler\n1" example.assignment.application.TaskAssignmentQueryHandler
+
+example.assignment.api.BaseProject                                    -[#595959,dashed]->  example.assignment.infrastructure.Task
+
+example.assignment.api.BaseTask                                       -[#595959,dashed]->  example.common.domain.Hours
+
+example.assignment.api.BaseTaskAssignment                             -[#595959,dashed]->  example.assignment.infrastructure.AssignedTaskItem
+
+example.assignment.api.events.DeleteProjectListener                         "1" *-[#595959,plain]-> "projectApplicationService\n1" example.assignment.application.ProjectApplicationService
+
+example.common.domain.Entity                                         -[#595959,dashed]->  example.common.domain.AggregateEvent
+
+example.common.domain.Entity                                         -[#000082,plain]-^  example.common.domain.AssertionConcern
+
+example.common.domain.Entity                                        "1" *-[#595959,plain]-> "id\n1" example.common.domain.Identity
+
+example.assignment.api.GetProjectTaskResponse                        "1" *-[#595959,plain]-> "tasks\n*" example.assignment.api.BaseTaskValueObject
+
+example.assignment.api.GetTaskAssignmentItemsResponse                 -[#595959,dashed]->  example.assignment.api.BaseAssignedTaskItemValueObject
+
+example.common.domain.Hours                                         "1" *-[#595959,plain]-> "ZERO\n1" example.common.domain.Hours
+
+example.common.domain.Hours                                          -[#000082,plain]-^  example.common.domain.ValueObject
+
+example.common.domain.IdentifiedValueObject                          -[#000082,plain]-^  example.common.domain.AssertionConcern
+
+example.common.domain.Identity                                       -[#000082,plain]-^  example.common.domain.ValueObject
+
+example.identity.api.IdentityController                            "1" *-[#595959,plain]-> "userService\n1" example.identity.application.UserService
+
+example.assignment.api.events.NewProjectCreatedListener                     "1" *-[#595959,plain]-> "projectApplicationService\n1" example.assignment.application.ProjectApplicationService
+
+example.assignment.api.events.ProjectCreatedEvent                            -[#000082,plain]-^  example.common.domain.AggregateEvent
+
+example.assignment.api.events.ProjectCreatedEvent                           "1" *-[#595959,plain]-> "tasks\n*" example.assignment.api.BaseTask
+
+example.assignment.application.ProjectApplicationService                     "1" *-[#595959,plain]-> "projectRepository\n1" example.assignment.infrastructure.ProjectRepository
+
+example.assignment.application.ProjectController                             "1" *-[#595959,plain]-> "projectQueryHandler\n1" example.assignment.application.ProjectQueryHandler
+
+example.assignment.application.ProjectDomainToInfrastructureConvertor         -[#595959,dashed]->  example.assignment.api.BaseProject
+
+example.assignment.application.ProjectInfrastructureToDomainConvertor         -[#595959,dashed]->  example.assignment.domain.Project
+
+example.assignment.application.ProjectQueryHandler                            -[#595959,dashed]->  example.assignment.api.BaseProject
+
+example.assignment.application.ProjectQueryHandler                            -[#595959,dashed]->  example.assignment.api.GetProjectResponse
+
+example.assignment.application.ProjectQueryHandler                            -[#595959,dashed]->  example.assignment.api.GetProjectTaskResponse
+
+example.assignment.application.ProjectQueryHandler                           "1" *-[#595959,plain]-> "projectRepository\n1" example.assignment.infrastructure.ProjectRepository
+
+example.assignment.api.BaseProject                                    -[#595959,dashed]->  example.assignment.infrastructure.Task
+
+example.assignment.domain.Project                                        -[#008200,dashed]-^  example.assignment.api.BaseProject
+
+example.assignment.domain.Project                                       "1" *-[#595959,plain]-> "tasks\n*" example.assignment.api.BaseTask
+
+example.assignment.domain.Project                                        -[#000082,plain]-^  example.common.domain.Entity
+
+example.assignment.infrastructure.Project                                        -[#595959,dashed]->  example.assignment.infrastructure.Project
+
+example.assignment.infrastructure.Project                                       "1" *-[#595959,plain]-> "tasks\n*" example.assignment.infrastructure.Task
+
+example.assignment.infrastructure.ProjectRepository                              -[#595959,dashed]->  example.assignment.api.BaseProject
+
+example.assignment.infrastructure.Task                                           -[#008200,dashed]-^  example.assignment.api.BaseTask
+
+example.assignment.infrastructure.Task                                           -[#008200,dashed]-^  example.assignment.api.BaseTaskValueObject
+
+example.assignment.infrastructure.Task                                          "1" *-[#595959,plain]-> "hours\n1" example.common.domain.Hours
+
+example.assignment.infrastructure.TaskAssignment                                 -[#008200,dashed]-^  example.assignment.api.BaseTaskAssignment
+
+example.assignment.domain.TaskAssignment                                 -[#000082,plain]-^  example.common.domain.Entity
+
+example.assignment.domain.TaskAssignment                                "1" *-[#595959,plain]-> "lineItems\n*" example.assignment.domain.TaskAssignmentLineItem
+
+example.assignment.domain.TaskAssignment                                "1" *-[#595959,plain]-> "taskState\n1" example.assignment.api.events.TaskState
+
+example.assignment.application.TaskAssignmentApplicationService              "1" *-[#595959,plain]-> "projectRepository\n1" example.assignment.infrastructure.ProjectRepository
+
+example.assignment.application.TaskAssignmentApplicationService              "1" *-[#595959,plain]-> "assignmentRepository\n1" example.assignment.infrastructure.TaskAssignmentRepository
+
+example.assignment.application.TaskAssignmentDomainToInfrastructureConvertor  -[#595959,dashed]->  example.assignment.api.BaseTaskAssignment
+
+example.assignment.application.TaskAssignmentInfrastructureToDomainConvertor  -[#595959,dashed]->  example.assignment.domain.TaskAssignment
+
+example.assignment.domain.TaskAssignmentLineItem                        "1" *-[#595959,plain]-> "hours\n1" example.common.domain.Hours
+
+example.common.domain.Hours                                         "1" *-[#595959,plain]-> "ZERO\n1" example.common.domain.Hours
+
+example.assignment.domain.TaskAssignmentLineItem                         -[#000082,plain]-^  example.common.domain.IdentifiedValueObject
+
+example.assignment.application.TaskAssignmentQueryHandler                     -[#595959,dashed]->  example.assignment.api.GetTaskAssignmentItemsResponse
+
+example.assignment.application.TaskAssignmentQueryHandler                     -[#595959,dashed]->  example.assignment.api.GetTaskAssignmentSummaryResponse
+
+example.assignment.application.TaskAssignmentQueryHandler                    "1" *-[#595959,plain]-> "assignmentRepository\n1" example.assignment.infrastructure.TaskAssignmentRepository
+
+example.assignment.infrastructure.TaskAssignmentRepository                       -[#595959,dashed]->  example.assignment.api.BaseTaskAssignment
+
+example.assignment.api.events.TaskDeserializer                               -[#595959,dashed]->  example.assignment.api.BaseTask
+
+example.common.domain.UniqueIDFactory                                -[#595959,dashed]->  example.common.domain.Identity
+
+example.identity.infrastructure.UserRepository                                 -[#595959,dashed]->  example.common.infrastructure.AppUser
+
+example.identity.application.UserService                                   "1" *-[#595959,plain]-> "jwtTokenUtil\n1" example.common.application.JwtTokenUtil
+
+example.identity.application.UserService                                   "1" *-[#595959,plain]-> "userRepository\n1" example.identity.infrastructure.UserRepository
+
+example.common.domain.ValueObject                                    -[#000082,plain]-^  example.common.domain.AssertionConcern
+
+
+@enduml

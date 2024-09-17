@@ -20,34 +20,34 @@ import java.util.Optional;
 @Service
 @AllArgsConstructor
 public class TaskAssignmentApplicationService {
-    private final TaskAssignmentRepository orderRepository;
+    private final TaskAssignmentRepository assignmentRepository;
     private final ProjectRepository projectRepository;
     private final Logger LOG = LoggerFactory.getLogger(getClass());
 
     @Transactional //Needed to ensure save is committed
-    public void addNewOrder(AddNewAssignmentCommand command) throws AssignmentOfTaskDomainException {
+    public void addNewAssignment(AddNewAssignmentCommand command) throws AssignmentOfTaskDomainException {
         try{
             example.assignment.domain.Project project = findProject(command.getProjectId());
             //ensure that all menu items supplied for the order already exist in restaurant's list of menu items
             command.getTaskAssignmentLineItems().stream()
-                .forEach(orderLineItem -> {
-                    if (!project.findTask(orderLineItem.taskId())) {
-                        throw new IllegalArgumentException("Menu id does not exist: " + orderLineItem.taskId());
+                .forEach(assignmentLineItem -> {
+                    if (!project.findTask(assignmentLineItem.taskId())) {
+                        throw new IllegalArgumentException("Task id does not exist: " + assignmentLineItem.taskId());
                     }
                 });
 
 
             List<TaskAssignmentLineItem> orderItems = command.getTaskAssignmentLineItems();
-            Identity idOfNewOrder = UniqueIDFactory.createID();
-            LOG.info("New order id is " + idOfNewOrder);
+            Identity idOfNewAssignment = UniqueIDFactory.createID();
+            LOG.info("New order id is " + idOfNewAssignment);
 
             //Pass info to aggregate to validate
-            example.assignment.domain.TaskAssignment newTaskAssignment = example.assignment.domain.TaskAssignment.createOrder(idOfNewOrder,
+            example.assignment.domain.TaskAssignment newTaskAssignment = example.assignment.domain.TaskAssignment.createAssignment(idOfNewAssignment,
                                                 command.getConsumerId(),
                                                 project,
                                                 orderItems);
             //Convert and save
-           orderRepository.save(TaskAssignmentDomainToInfrastructureConvertor.convert(newTaskAssignment));
+           assignmentRepository.save(TaskAssignmentDomainToInfrastructureConvertor.convert(newTaskAssignment));
         }
         catch (IllegalArgumentException e) {
             LOG.info(e.getMessage());
@@ -55,17 +55,17 @@ public class TaskAssignmentApplicationService {
         }
     }
 
-    public void cancelOrder(String orderId) throws AssignmentOfTaskDomainException {
+    public void cancelAssignment(String assignmentId) throws AssignmentOfTaskDomainException {
         try{
-            Optional<TaskAssignment> orderToBeCancelled = orderRepository.findById(orderId);
-            if(orderToBeCancelled.isEmpty()){ throw new IllegalArgumentException("Order id does not exist");}
+            Optional<TaskAssignment> assignmentToBeCancelled = assignmentRepository.findById(assignmentId);
+            if(assignmentToBeCancelled.isEmpty()){ throw new IllegalArgumentException("Assignment id does not exist");}
 
-            example.assignment.domain.Project project = findProject(orderToBeCancelled.get().getProject_id());
+            example.assignment.domain.Project project = findProject(assignmentToBeCancelled.get().getProject_id());
             //Convert to domain and cancel
-            example.assignment.domain.TaskAssignment taskAssignmentToCancel = TaskAssignmentInfrastructureToDomainConvertor.convert(orderToBeCancelled.get(), project);
-            taskAssignmentToCancel.cancelOrder();
+            example.assignment.domain.TaskAssignment taskAssignmentToCancel = TaskAssignmentInfrastructureToDomainConvertor.convert(assignmentToBeCancelled.get(), project);
+            taskAssignmentToCancel.cancelAssignment();
             //Convert to infrastructure and save
-            orderRepository.save(TaskAssignmentDomainToInfrastructureConvertor.convert(taskAssignmentToCancel));
+            assignmentRepository.save(TaskAssignmentDomainToInfrastructureConvertor.convert(taskAssignmentToCancel));
         }
         catch (IllegalArgumentException e) {
             LOG.info(e.getMessage());
@@ -74,10 +74,10 @@ public class TaskAssignmentApplicationService {
     }
 
     private example.assignment.domain.Project findProject(String idOfProject) {
-        //Check restaurant id is valid
-        Optional<example.assignment.infrastructure.Project> restaurantFromRepo = projectRepository.findById(idOfProject);
-        if(restaurantFromRepo.isEmpty()){ throw new IllegalArgumentException("Restaurant id does not exist");}
-        //convert restaurant from infrastructure to domain
-        return ProjectInfrastructureToDomainConvertor.convert(restaurantFromRepo.get());
+        //Check project id is valid
+        Optional<example.assignment.infrastructure.Project> projectFromRepo = projectRepository.findById(idOfProject);
+        if(projectFromRepo.isEmpty()){ throw new IllegalArgumentException("Project id does not exist");}
+        //convert project from infrastructure to domain
+        return ProjectInfrastructureToDomainConvertor.convert(projectFromRepo.get());
     }
 }

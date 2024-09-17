@@ -18,10 +18,10 @@ public class TaskAssignment extends Entity {
     private TaskState taskState;
 
     //Factory method
-    public static TaskAssignment createOrder(Identity id,
-                                             String consumerId,
-                                             Project project,
-                                             List<TaskAssignmentLineItem> taskAssignmentLineItems) {
+    public static TaskAssignment createAssignment(Identity id,
+                                                  String consumerId,
+                                                  Project project,
+                                                  List<TaskAssignmentLineItem> taskAssignmentLineItems) {
 
        TaskAssignment taskAssignment = new TaskAssignment(id, consumerId, project.id().toString(), taskAssignmentLineItems);
 
@@ -68,7 +68,7 @@ public class TaskAssignment extends Entity {
         return lineItems.stream().filter(li -> li.taskId()==lineItemId).findFirst().get();
     }
 
-    public void cancelOrder(){
+    public void cancelAssignment(){
         taskState = TaskState.NOT_REQUIRED;
     }
 }

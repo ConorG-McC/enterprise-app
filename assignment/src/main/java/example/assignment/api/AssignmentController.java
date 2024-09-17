@@ -22,14 +22,14 @@ public class AssignmentController {
     //e.g. http://localhost:8900/assignments/summary/a1
     @GetMapping(path = "/summary/{taskAssignmentId}")
     public ResponseEntity<GetTaskAssignmentSummaryResponse> getAssignmentSummary(@PathVariable String taskAssignmentId) {
-        return assignmentsQueryHandler.getOrderSummary(taskAssignmentId).map(
+        return assignmentsQueryHandler.getAssignmentSummary(taskAssignmentId).map(
                 o -> new ResponseEntity<>(o, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     //e.g. http://localhost:8900/assignments/a1
     @RequestMapping(path = "/{taskAssignmentId}", method = RequestMethod.GET)
-    public ResponseEntity<GetTaskAssignmentItemsResponse> getOrderItems(@PathVariable String taskAssignmentId) {
+    public ResponseEntity<GetTaskAssignmentItemsResponse> getAssignmentTasks(@PathVariable String taskAssignmentId) {
         LOG.info("Get order items for {}", taskAssignmentId);
         return assignmentsQueryHandler.getAssignedTaskItems(taskAssignmentId).map(
                 o -> new ResponseEntity<>(o, HttpStatus.OK))
@@ -53,9 +53,9 @@ public class AssignmentController {
          ]
      }**/
     @PostMapping("/newAssignment")
-    public HttpStatus addOrder(@RequestBody AddNewAssignmentCommand command){
+    public HttpStatus addAssignment(@RequestBody AddNewAssignmentCommand command){
         try {
-            taskAssignmentApplicationService.addNewOrder(command);
+            taskAssignmentApplicationService.addNewAssignment(command);
             return HttpStatus.CREATED;
         }
         catch(AssignmentOfTaskDomainException e){
@@ -64,9 +64,9 @@ public class AssignmentController {
     }
 
     @PostMapping("/{taskAssignmentId}/cancel")
-    public HttpStatus cancelOrder(@PathVariable String taskAssignmentId){
+    public HttpStatus cancelAssignment(@PathVariable String taskAssignmentId){
         try {
-            taskAssignmentApplicationService.cancelOrder(taskAssignmentId);
+            taskAssignmentApplicationService.cancelAssignment(taskAssignmentId);
             return HttpStatus.OK;
         }
         catch(AssignmentOfTaskDomainException e){
