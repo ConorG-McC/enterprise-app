@@ -2,7 +2,7 @@ package example.project.domain;
 
 import example.common.domain.Identity;
 import example.common.domain.Hours;
-import example.common.api.BaseTask;
+import example.project.api.BaseTask;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

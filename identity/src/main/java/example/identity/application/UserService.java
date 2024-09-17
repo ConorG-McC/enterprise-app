@@ -11,13 +11,13 @@ import java.util.Optional;
 @Service
 @Transactional
 @AllArgsConstructor
-public class UserService{
+public class UserService {
     private UserRepository userRepository;
     private JwtTokenUtil jwtTokenUtil;
 
     public Optional<String> authenticate(String username,
-                                         String password){
+                                         String password) {
         return userRepository.findUserByUsernameAndPassword(username, password)
-                            .map(jwtTokenUtil::generateToken);
+                .map(jwtTokenUtil::generateToken);
     }
 }

@@ -3,7 +3,6 @@ package example.project.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import example.common.api.BaseProject;
 import example.common.domain.Hours;
 import example.project.application.IdentityService;
 import example.project.application.ProjectApplicationService;

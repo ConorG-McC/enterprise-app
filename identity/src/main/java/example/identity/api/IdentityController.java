@@ -15,7 +15,7 @@ public class IdentityController {
     private UserService userService;
 
     @PostMapping("/validate")
-    public ResponseEntity<?> validate(@RequestBody UserDetailsRequest command){
+    public ResponseEntity<?> validate(@RequestBody UserDetailsRequest command) {
 
         Optional<String> token =
                 userService.authenticate(command.getUsername(),

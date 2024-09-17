@@ -9,6 +9,6 @@ import org.junit.platform.suite.api.Suite;
         {
                 IdentityControllerTests.class
         }
-        )
+)
 public class IdentityTestSuite {
 }
