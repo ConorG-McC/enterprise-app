@@ -7,8 +7,12 @@ import org.junit.platform.suite.api.SelectClasses;
 import org.junit.platform.suite.api.Suite;
 
 @Suite
-@SelectClasses( {TaskTests.class,
+@SelectClasses(
+        {
+                TaskTests.class,
                 ProjectTests.class,
-                ProjectControllerTests.class,})
-public class TestSuite {
+                ProjectControllerTests.class
+        }
+        )
+public class ProjectTestSuite {
 }

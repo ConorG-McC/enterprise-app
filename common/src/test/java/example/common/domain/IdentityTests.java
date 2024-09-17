@@ -1,6 +1,5 @@
-package example.common;
+package example.common.domain;
 
-import example.common.domain.Identity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
