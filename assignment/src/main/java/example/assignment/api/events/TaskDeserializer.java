@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
 import example.assignment.api.BaseTask;
-import example.assignment.domain.Task;
 import example.common.domain.Hours;
 
 import java.io.IOException;

@@ -1,8 +1,8 @@
 package example.assignment.domain;
 
+import example.assignment.api.BaseTask;
 import example.common.domain.Hours;
 import example.common.domain.ValueObject;
-import example.assignment.api.BaseTask;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,7 +21,9 @@ public class Task extends ValueObject implements BaseTask { //BaseMenuItem (live
         setHours(hours);
     }
 
-    public long id(){return id;}
+    public long id() {
+        return id;
+    }
 
     public String name() {
         return name;
@@ -47,7 +49,7 @@ public class Task extends ValueObject implements BaseTask { //BaseMenuItem (live
         this.hours = hours;
     }
 
-    public String toString(){
+    public String toString() {
         return String.format("id=%s, name=%s, hours=%s", id(), name, hours);
     }
 

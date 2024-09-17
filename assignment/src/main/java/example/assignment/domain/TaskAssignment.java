@@ -1,10 +1,12 @@
 package example.assignment.domain;
 
-import example.common.domain.*;
 import example.assignment.api.events.TaskState;
+import example.common.domain.Entity;
+import example.common.domain.Identity;
 import lombok.ToString;
 
 import java.util.List;
+
 import static example.assignment.api.events.TaskState.TO_DO;
 
 @ToString
@@ -23,15 +25,15 @@ public class TaskAssignment extends Entity {
                                                   Project project,
                                                   List<TaskAssignmentLineItem> taskAssignmentLineItems) {
 
-       TaskAssignment taskAssignment = new TaskAssignment(id, consumerId, project.id().toString(), taskAssignmentLineItems);
+        TaskAssignment taskAssignment = new TaskAssignment(id, consumerId, project.id().toString(), taskAssignmentLineItems);
 
-       return taskAssignment;
+        return taskAssignment;
     }
 
     public TaskAssignment(Identity id,
                           String consumerId,
                           String projectId,
-                          List<TaskAssignmentLineItem> taskAssignmentLineItems){
+                          List<TaskAssignmentLineItem> taskAssignmentLineItems) {
         super(id);
         setConsumerId(consumerId);
         setProjectId(projectId);
@@ -52,23 +54,25 @@ public class TaskAssignment extends Entity {
         return projectId;
     }
 
-    public TaskState state() { return taskState;}
+    public TaskState state() {
+        return taskState;
+    }
 
-    private void setConsumerId(String consumerId){
+    private void setConsumerId(String consumerId) {
         assertArgumentNotEmpty(consumerId, "consumerId cannot be empty");
         this.consumerId = consumerId;
     }
 
-    private void setProjectId(String projectId){
+    private void setProjectId(String projectId) {
         assertArgumentNotEmpty(projectId, "projectId cannot be empty");
         this.projectId = projectId;
     }
 
     TaskAssignmentLineItem findTaskAssignmentItem(long lineItemId) {
-        return lineItems.stream().filter(li -> li.taskId()==lineItemId).findFirst().get();
+        return lineItems.stream().filter(li -> li.taskId() == lineItemId).findFirst().get();
     }
 
-    public void cancelAssignment(){
+    public void cancelAssignment() {
         taskState = TaskState.NOT_REQUIRED;
     }
 }

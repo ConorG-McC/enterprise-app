@@ -3,8 +3,6 @@ package example.project.api;
 import example.project.domain.Task;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,7 +13,7 @@ public class CreateProjectCommand {
     private String projectName;
     private List<Task> tasks;
 
-    public String toString(){
+    public String toString() {
         String tasksAsString = tasks.stream()
                 .map(Object::toString)
                 .collect(Collectors.joining("\n"));

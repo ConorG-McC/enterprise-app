@@ -1,7 +1,7 @@
 package example.assignment.domain;
 
-import example.common.domain.IdentifiedValueObject;
 import example.common.domain.Hours;
+import example.common.domain.IdentifiedValueObject;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
@@ -35,7 +35,7 @@ public class TaskAssignmentLineItem extends IdentifiedValueObject {
     private void setHours(Hours hours) {
         assertArgumentNotEmpty(hours, "hours cannot be empty");
         assertValueIsGreaterThan(hours.asBigDecimal(), BigDecimal.valueOf(MINIMUM_QUANTITY),
-                "hours must be greater than " + (MINIMUM_QUANTITY-1));
+                "hours must be greater than " + (MINIMUM_QUANTITY - 1));
         this.hours = hours;
     }
 

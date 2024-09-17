@@ -1,8 +1,7 @@
 package example.assignment.api.events;
 
-import example.assignment.domain.Task;
-import example.common.domain.AggregateEvent;
 import example.assignment.api.BaseTask;
+import example.common.domain.AggregateEvent;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

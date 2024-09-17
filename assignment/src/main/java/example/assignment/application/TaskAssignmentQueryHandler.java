@@ -4,13 +4,13 @@ import example.assignment.api.GetTaskAssignmentItemsResponse;
 import example.assignment.api.GetTaskAssignmentSummaryResponse;
 import example.assignment.api.events.TaskState;
 import example.assignment.infrastructure.AssignedTaskItem;
-import example.assignment.infrastructure.TaskAssignmentRepository;
 import example.assignment.infrastructure.TaskAssignment;
+import example.assignment.infrastructure.TaskAssignmentRepository;
 import lombok.AllArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.modelmapper.ModelMapper;
 
 import java.util.List;
 import java.util.Optional;
@@ -43,7 +43,7 @@ public class TaskAssignmentQueryHandler {
     //No mapper used as we want to convert before assigning to response to avoid coupling to infrastructure
     private GetTaskAssignmentSummaryResponse makeGetAssignmentSummaryResponse(TaskAssignment assignment) {
         return new GetTaskAssignmentSummaryResponse(assignment.getId(),
-                                            TaskState.values()[assignment.getTask_state()].name());//Avoid JSON conversion error
+                TaskState.values()[assignment.getTask_state()].name());//Avoid JSON conversion error
     }
 
     private GetTaskAssignmentItemsResponse makeGetAssignmentTasksResponse(TaskAssignment taskAssignment) {
@@ -58,8 +58,6 @@ public class TaskAssignmentQueryHandler {
         LOG.info("Mapped response: {}", response);
         return response;
     }
-
-
 
 
 }

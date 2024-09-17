@@ -1,13 +1,13 @@
 package example.assignment.application;
 
-import example.common.domain.Hours;
-import example.common.domain.Identity;
 import example.assignment.api.BaseProject;
 import example.assignment.api.BaseTask;
 import example.assignment.api.events.ProjectCreatedEvent;
 import example.assignment.domain.Project;
 import example.assignment.domain.Task;
 import example.assignment.infrastructure.ProjectRepository;
+import example.common.domain.Hours;
+import example.common.domain.Identity;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,14 +64,11 @@ public class ProjectApplicationService {
 
             String response = "Project with id" + projectId + " deleted";
             return response;
-        }
-        catch (ProjectNotFoundException e) {
+        } catch (ProjectNotFoundException e) {
             throw new Exception(e.getMessage());
-        }
-        catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             throw new Exception(e.getMessage());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new Exception("Error deleting project from repository with id: " + projectId + "\n Error: " + e.getMessage());
         }
     }

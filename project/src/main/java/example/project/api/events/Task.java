@@ -18,7 +18,9 @@ public class Task implements BaseTask { //Need the interface to decouple event v
     private String name;
     private Hours hours;
 
-    public long id(){return id;}
+    public long id() {
+        return id;
+    }
 
     public String name() {
         return name;
@@ -28,7 +30,7 @@ public class Task implements BaseTask { //Need the interface to decouple event v
         return hours;
     }
 
-    public String toString(){
+    public String toString() {
         return String.format("id=%s, name=%s, hours=%s", id(), name, hours);
     }
 }

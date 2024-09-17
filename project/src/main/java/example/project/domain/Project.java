@@ -23,14 +23,14 @@ public class Project extends Entity {
         setName(name);
         setTasks(tasks);
         //Store event (tasks need converting to event type rather than domain
-        event = Optional.of((new ProjectCreatedEvent( id.toString(), name, tasks)));
+        event = Optional.of((new ProjectCreatedEvent(id.toString(), name, tasks)));
     }
 
-    public String name(){
+    public String name() {
         return name;
     }
 
-    private void setTasks(List<BaseTask> tasks){
+    private void setTasks(List<BaseTask> tasks) {
         assertArgumentNotEmpty(tasks, "tasks cannot be null");
         this.tasks = tasks;
     }
@@ -40,16 +40,16 @@ public class Project extends Entity {
         this.name = name;
     }
 
-    public List<BaseTask> tasks(){
+    public List<BaseTask> tasks() {
         return tasks;
     }
 
-    public boolean findTask(long taskId){
+    public boolean findTask(long taskId) {
         return tasks.stream()
-                        .anyMatch(task -> task.id()==taskId);
+                .anyMatch(task -> task.id() == taskId);
     }
 
-    public String toString(){
+    public String toString() {
         String tasksAsString = tasks.stream()
                 .map(Object::toString)
                 .collect(Collectors.joining("\n"));

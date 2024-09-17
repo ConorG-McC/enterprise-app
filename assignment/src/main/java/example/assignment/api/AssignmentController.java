@@ -1,8 +1,8 @@
 package example.assignment.api;
 
+import example.assignment.application.AssignmentOfTaskDomainException;
 import example.assignment.application.TaskAssignmentApplicationService;
 import example.assignment.application.TaskAssignmentQueryHandler;
-import example.assignment.application.AssignmentOfTaskDomainException;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +23,7 @@ public class AssignmentController {
     @GetMapping(path = "/summary/{taskAssignmentId}")
     public ResponseEntity<GetTaskAssignmentSummaryResponse> getAssignmentSummary(@PathVariable String taskAssignmentId) {
         return assignmentsQueryHandler.getAssignmentSummary(taskAssignmentId).map(
-                o -> new ResponseEntity<>(o, HttpStatus.OK))
+                        o -> new ResponseEntity<>(o, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
@@ -32,44 +32,45 @@ public class AssignmentController {
     public ResponseEntity<GetTaskAssignmentItemsResponse> getAssignmentTasks(@PathVariable String taskAssignmentId) {
         LOG.info("Get order items for {}", taskAssignmentId);
         return assignmentsQueryHandler.getAssignedTaskItems(taskAssignmentId).map(
-                o -> new ResponseEntity<>(o, HttpStatus.OK))
+                        o -> new ResponseEntity<>(o, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
-    /** e.g. http://localhost:8900/assignments/newAssignment
-     {
-         "consumerId": "user123",
-         "projectId": "p1",
-         "taskAssignmentLineItems": [
-             {
-                 "taskId": 1,
-                 "taskName": "Develop Backend API",
-                 "hours": 20.50
-             },
-             {
-                 "taskId": 2,
-                 "taskName": "Design Frontend UI",
-                 "hours": 12.00
-             }
-         ]
-     }**/
+
+    /**
+     * e.g. http://localhost:8900/assignments/newAssignment
+     * {
+     * "consumerId": "user123",
+     * "projectId": "p1",
+     * "taskAssignmentLineItems": [
+     * {
+     * "taskId": 1,
+     * "taskName": "Develop Backend API",
+     * "hours": 20.50
+     * },
+     * {
+     * "taskId": 2,
+     * "taskName": "Design Frontend UI",
+     * "hours": 12.00
+     * }
+     * ]
+     * }
+     **/
     @PostMapping("/newAssignment")
-    public HttpStatus addAssignment(@RequestBody AddNewAssignmentCommand command){
+    public HttpStatus addAssignment(@RequestBody AddNewAssignmentCommand command) {
         try {
             taskAssignmentApplicationService.addNewAssignment(command);
             return HttpStatus.CREATED;
-        }
-        catch(AssignmentOfTaskDomainException e){
+        } catch (AssignmentOfTaskDomainException e) {
             return HttpStatus.BAD_REQUEST;
         }
     }
 
     @PostMapping("/{taskAssignmentId}/cancel")
-    public HttpStatus cancelAssignment(@PathVariable String taskAssignmentId){
+    public HttpStatus cancelAssignment(@PathVariable String taskAssignmentId) {
         try {
             taskAssignmentApplicationService.cancelAssignment(taskAssignmentId);
             return HttpStatus.OK;
-        }
-        catch(AssignmentOfTaskDomainException e){
+        } catch (AssignmentOfTaskDomainException e) {
             return HttpStatus.BAD_REQUEST;
         }
     }

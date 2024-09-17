@@ -14,13 +14,13 @@ public class AddNewAssignmentCommand {
     String projectId;
     List<TaskAssignmentLineItem> taskAssignmentLineItems; //use interface in api to avoid coupling to domain
 
-    public String toString(){
+    public String toString() {
         String assignmentItemsAsString = taskAssignmentLineItems.stream()
                 .map(Object::toString)
                 .collect(Collectors.joining("\n"));
 
         return String.format("\nProject: %s, tasks \n[%s]",
                 projectId,
-                                assignmentItemsAsString);
+                assignmentItemsAsString);
     }
 }

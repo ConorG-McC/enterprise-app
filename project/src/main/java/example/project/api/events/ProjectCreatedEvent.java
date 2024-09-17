@@ -2,7 +2,8 @@ package example.project.api.events;
 
 import example.common.domain.AggregateEvent;
 import example.project.api.BaseTask;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 import java.util.List;
 

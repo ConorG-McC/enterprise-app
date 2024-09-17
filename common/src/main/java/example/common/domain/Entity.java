@@ -10,20 +10,22 @@ public abstract class Entity extends AssertionConcern {
     protected Optional<AggregateEvent> event = Optional.empty();
 
     protected final Identity id;
+
     protected Entity(Identity id) {
-        assertArgumentNotEmpty(id,"Id cannot be empty");
+        assertArgumentNotEmpty(id, "Id cannot be empty");
         this.id = id;
     }
 
-    public boolean equals(Object o){
-        if (o == null && o.getClass() != this.getClass()){
+    public boolean equals(Object o) {
+        if (o == null && o.getClass() != this.getClass()) {
             return false;
         }
         Entity another = (Entity) o;
 
         return another.id == this.id;
     }
-    public Identity id(){
+
+    public Identity id() {
         return id;
     }
 }

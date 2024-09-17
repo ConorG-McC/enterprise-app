@@ -14,6 +14,6 @@ import org.junit.platform.suite.api.Suite;
                 AssertionConcernTests.class,
                 IdentityTests.class
         }
-        )
+)
 public class CommonTestSuite {
 }

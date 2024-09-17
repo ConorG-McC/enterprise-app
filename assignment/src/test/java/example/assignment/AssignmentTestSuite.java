@@ -20,6 +20,6 @@ import org.junit.platform.suite.api.Suite;
                 AssignmentControllerTests.class
 
         }
-        )
+)
 public class AssignmentTestSuite {
 }
