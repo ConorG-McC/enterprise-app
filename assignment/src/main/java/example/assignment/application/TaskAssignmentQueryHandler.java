@@ -18,35 +18,35 @@ import java.util.Optional;
 @Service
 @AllArgsConstructor
 public class TaskAssignmentQueryHandler {
-    private TaskAssignmentRepository orderRepository;
+    private TaskAssignmentRepository taskAssignmentRepository;
     private final ModelMapper modelMapper = new ModelMapper();
     private final Logger LOG = LoggerFactory.getLogger(getClass());
 
 
-    public Optional<GetTaskAssignmentSummaryResponse> getOrderSummary(String orderId) {
-        Optional<TaskAssignment> order = orderRepository.findById(orderId);
+    public Optional<GetTaskAssignmentSummaryResponse> getAssignmentSummary(String assignmentId) {
+        Optional<TaskAssignment> order = taskAssignmentRepository.findById(assignmentId);
         //Take the order and map via makeGetOrderSummaryResponse if optional.isPresent() else not found
-        return order.flatMap(order1 -> Optional.of(makeGetOrderSummaryResponse(order1)));
+        return order.flatMap(order1 -> Optional.of(makeGetAssignmentSummaryResponse(order1)));
     }
 
-    public Optional<GetTaskAssignmentItemsResponse> getAssignedTaskItems(String orderId) {
-        LOG.info("TEST: AHHH orderId {} ", orderId);
-        Optional<TaskAssignment> order = orderRepository.findById(orderId);
+    public Optional<GetTaskAssignmentItemsResponse> getAssignedTaskItems(String assignmentId) {
+        LOG.info("TEST: AHHH assignmentId {} ", assignmentId);
+        Optional<TaskAssignment> order = taskAssignmentRepository.findById(assignmentId);
         LOG.info("TEST: ahhh is {} ", order);
 
-        Optional<GetTaskAssignmentItemsResponse> response = order.flatMap(order1 -> Optional.of(makeGetOrderItemsResponse(order1)));
+        Optional<GetTaskAssignmentItemsResponse> response = order.flatMap(assignment1 -> Optional.of(makeGetAssignmentTasksResponse(assignment1)));
         LOG.info("TEST: response is {} ", response);
         return response;
 
     }
 
     //No mapper used as we want to convert before assigning to response to avoid coupling to infrastructure
-    private GetTaskAssignmentSummaryResponse makeGetOrderSummaryResponse(TaskAssignment order) {
-        return new GetTaskAssignmentSummaryResponse(order.getId(),
-                                            TaskState.values()[order.getTask_state()].name());//Avoid JSON conversion error
+    private GetTaskAssignmentSummaryResponse makeGetAssignmentSummaryResponse(TaskAssignment assignment) {
+        return new GetTaskAssignmentSummaryResponse(assignment.getId(),
+                                            TaskState.values()[assignment.getTask_state()].name());//Avoid JSON conversion error
     }
 
-    private GetTaskAssignmentItemsResponse makeGetOrderItemsResponse(TaskAssignment taskAssignment) {
+    private GetTaskAssignmentItemsResponse makeGetAssignmentTasksResponse(TaskAssignment taskAssignment) {
         LOG.info("Mapping TaskAssignment to GetTaskAssignmentItemsResponse: {}", taskAssignment);
 
         // Get the list of AssignedTaskItem from TaskAssignment
