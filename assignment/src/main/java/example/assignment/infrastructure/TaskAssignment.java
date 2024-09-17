@@ -45,7 +45,7 @@ public class TaskAssignment implements BaseTaskAssignment {
         this.assignedTaskItem = new ArrayList<>(); //Initialise the empty list in order to allow orderLineItems to work
     }
     //Needed for the convertor
-    public void addOrderItem(AssignedTaskItem assignedTaskItems) {
+    public void addAssignmentTaskItem(AssignedTaskItem assignedTaskItems) {
         assignedTaskItem.add(assignedTaskItems);
     }
 
