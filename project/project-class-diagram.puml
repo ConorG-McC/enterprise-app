@@ -1,0 +1,305 @@
+@startuml
+!theme plain
+top to bottom direction
+skinparam linetype ortho
+
+' Include the legend (key) at the top left
+legend top left
+|= **Symbol** |= **Meaning** |
+| <&interface> **Interface** | Interface |
+| <&enumeration> **Enumeration** | Enumeration (Enum) |
+| [#000082,plain]-^ | Generalization (Inheritance) |
+| [#008200,dashed]-^ | Realization (Interface Implementation) |
+| [#595959,dashed]-> | Dependency |
+| [#595959,plain]-> | Association |
+| [*] **Multiplicity** | Multiplicity Indicator |
+||
+|= **Visibility Indicators** |= **Description** |
+| `+` (plus sign) | Public member |
+| `-` (minus sign) | Private member |
+| `#` (hash sign) | Protected member |
+| `~` (tilde) | Package-private member |
+||
+| **Constructor Notation** | |
+| `<<Create>>` | Constructor method |
+||
+| **Property Indicators** | |
+| Underlined | Static member |
+| *Italicized* | Abstract member |
+endlegend
+
+' Define packages and include classes within them
+
+package "example.project.api" {
+    class CreateProjectCommand {
+        - String projectName
+        - List<Task> tasks
+        + String toString()
+    }
+    class ProjectController {
+        - ProjectQueryHandler projectQueryHandler
+        - ProjectApplicationService projectApplicationService
+        - IdentityService identityService
+        + ResponseEntity<?> findAll(String)
+        + ResponseEntity<?> findById(String,String)
+        + ResponseEntity<?> findTasksByProjectId(String,String)
+        + ResponseEntity<?> createProjectWithTasks(CreateProjectCommand,String)
+        + ResponseEntity<?> deleteProject(String,String)
+        - ResponseEntity<?> generateErrorResponse(String)
+    }
+    class GetProjectTaskResponse {
+        - String projectId
+        - String name
+        - List<BaseTaskValueObject> tasks
+    }
+    class GetProjectResponse {
+        - String projectId
+        - String name
+    }
+    interface BaseProject {
+        ~ String getId()
+        ~ String getName()
+        ~ List<Task> getTasks()
+        ~ void addTask(Task)
+    }
+    interface BaseTask {
+        ~ long id()
+        ~ String name()
+        ~ Hours hours()
+    }
+    interface BaseTaskValueObject {
+        ~ long getId()
+        ~ String getName()
+        ~ double getHours()
+        ~ String getProject_id()
+    }
+}
+
+package "example.project.api.events" {
+    class ProjectCreatedEvent {
+        - String aggregateID
+        - String projectName
+        - List<BaseTask> tasks
+    }
+    class RabbitMQConfig {
+        - String hostname
+        - String username
+        - String password
+        + ConnectionFactory getConnection()
+        + RabbitTemplate rabbitTemplate(ConnectionFactory)
+        ~ SimpleRabbitListenerContainerFactory eventListenerContainer()
+        + MessageConverter jsonMessageConverter()
+    }
+    class TaskCustomSerializer {
+        + void serialize(Task, JsonGenerator, SerializerProvider)
+    }
+}
+
+package "example.project.application" {
+    class ProjectQueryHandler {
+        - ProjectRepository projectRepository
+        - ModelMapper modelMapper
+        + Optional<GetProjectResponse> getProject(String)
+        + Iterable<BaseProject> getAllProjects()
+        + Optional<GetProjectTaskResponse> getProjectTasks(String)
+    }
+    class ProjectApplicationService {
+        - ProjectRepository projectRepository
+        - Environment env
+        - RabbitTemplate sender
+        - Logger LOG
+        + String createProjectWithTasks(CreateProjectCommand)
+        - void publishNewProjectEvent(Project)
+        + String deleteProjectById(String)
+        - void publishDeleteProjectEvent(String)
+    }
+    class ProjectInfrastructureToDomainConvertor {
+        + {static} Project convert(BaseProject)
+    }
+    class ProjectDomainToInfrastructureConvertor {
+        + {static} BaseProject convert(Project)
+    }
+    class IdentityService {
+        - JwtTokenUtil jwtTokenUtil
+        + boolean isSpecifiedUser(String, String)
+        + boolean isAdmin(String)
+        + void checkIfTokenHasExpired(String)
+        + UserDTO getDetailsFromToken(String)
+    }
+}
+
+package "example.project.domain" {
+    class Project {
+        - List<BaseTask> tasks
+        - String name
+        + <<Create>> Project(Identity, String, List<BaseTask>)
+        + {static} Project projectOf(Identity, String, List<BaseTask>)
+        + String name()
+        + List<BaseTask> tasks()
+        + boolean findTask(long)
+        + String toString()
+        - void setTasks(List<BaseTask>)
+        - void setName(String)
+    }
+    class Task {
+        - long id
+        - String name
+        - Hours hours
+        + <<Create>> Task(long, String, Hours)
+        + long id()
+        + String name()
+        + Hours hours()
+        - void setId(long)
+        - void setName(String)
+        - void setHours(Hours)
+        + String toString()
+    }
+}
+
+package "example.project.infrastructure" {
+    class Project {
+        - String id
+        - String name
+        - List<Task> tasks
+        # <<Create>> Project()
+        # <<Create>> Project(String,String)
+        + void addTask(Task)
+        + {static} Project projectOf(String,String)
+    }
+    interface ProjectRepository {
+        ~ Iterable<BaseProject> findAllProjects()
+        ~ Optional<BaseProject> findByName(String)
+        ~ BaseProject save(BaseProject)
+    }
+    class Task {
+        - long id
+        - String name
+        - double hours
+        - String project_id
+        + Task(long, String, double, String)
+        + String toString()
+    }
+}
+
+package "example.identity.api" {
+    class IdentityController {
+        - UserService userService
+        + ResponseEntity<?> validate(UserDetailsRequest)
+    }
+    class UserDetailsRequest {
+        - String username
+        - String password
+        + String toString()
+    }
+}
+
+package "example.identity.application" {
+    class UserService {
+        - UserRepository userRepository
+        - JwtTokenUtil jwtTokenUtil
+        + Optional<String> authenticate(String, String)
+    }
+}
+
+package "example.identity.infrastructure" {
+    interface UserRepository {
+        ~ Optional<AppUser> findUserByUsernameAndPassword(String, String)
+    }
+}
+
+package "example.common.domain" {
+    abstract class Entity {
+        # Optional<AggregateEvent> event
+        # Identity id
+        # <<Create>> Entity(Identity)
+        + boolean equals(Object)
+        + Identity id()
+    }
+    class AggregateEvent {
+        - Logger LOG
+        + String toJson()
+    }
+    class Hours {
+        + {static} Hours ZERO
+        - BigDecimal amount
+        + <<Create>> Hours(BigDecimal)
+        + <<Create>> Hours(String)
+        + <<Create>> Hours(int)
+        + <<Create>> Hours(Hours)
+        + boolean equals(Object)
+        + int hashCode()
+        + String toString()
+        + Hours add(Hours)
+        + boolean isGreaterThanOrEqual(Hours)
+        + BigDecimal asBigDecimal()
+        + double asDouble()
+        + String asString()
+        + Hours multiply(int)
+    }
+    abstract class IdentifiedValueObject {
+        - long id
+        + long id()
+    }
+    class Identity {
+        # String id
+        + <<Create>> Identity(String)
+        - void setID(String)
+        + String toString()
+        + String id()
+    }
+    class UniqueIDFactory {
+        + {static} Identity createID()
+    }
+}
+
+package "example.common.infrastructure" {
+    class AppUser {
+        - String userUUID
+        - String userName
+        - String password
+        - String email
+        - String firstName
+        - String surname
+        - Role role
+        + String toString()
+    }
+    class Role {
+        - long id
+        - String type
+        + String toString()
+    }
+    class RoleCustomSerializer {
+        + void serialize(Role, JsonGenerator, SerializerProvider)
+    }
+}
+
+' Define relationships with fully qualified class names and include colors
+
+example.project.api.CreateProjectCommand                       "1" *-[#595959,plain]-> "tasks\n*" example.project.domain.Task
+example.common.infrastructure.AppUser                          "1" *-[#595959,plain]-> "role\n1" example.common.infrastructure.Role
+example.project.api.ProjectController                          -[#595959,dashed]-> example.project.api.GetProjectTaskResponse
+example.project.api.ProjectController                          -[#595959,dashed]-> example.project.api.GetProjectResponse
+example.project.api.ProjectController                          "1" *-[#595959,plain]-> "projectQueryHandler\n1" example.project.application.ProjectQueryHandler
+example.project.api.ProjectController                          "1" *-[#595959,plain]-> "projectApplicationService\n1" example.project.application.ProjectApplicationService
+example.project.api.ProjectController                          "1" *-[#595959,plain]-> "identityService\n1" example.project.application.IdentityService
+example.project.application.ProjectQueryHandler                -[#595959,dashed]-> example.project.application.ProjectRepository
+example.project.application.ProjectQueryHandler                -[#595959,dashed]-> example.project.api.GetProjectTaskResponse
+example.project.application.ProjectQueryHandler                -[#595959,dashed]-> example.project.api.GetProjectResponse
+example.project.application.ProjectApplicationService          "1" *-[#595959,plain]-> "projectRepository\n1" example.project.infrastructure.ProjectRepository
+example.project.application.ProjectApplicationService          "1" *-[#595959,plain]-> "sender\n1" RabbitTemplate
+example.project.application.ProjectApplicationService          "1" *-[#595959,plain]-> "env\n1" Environment
+example.project.application.IdentityService                    -[#595959,dashed]-> example.common.application.JwtTokenUtil
+example.identity.application.UserService                       "1" *-[#595959,plain]-> "userRepository\n1" example.identity.infrastructure.UserRepository
+example.identity.application.UserService                       "1" *-[#595959,plain]-> "jwtTokenUtil\n1" example.common.application.JwtTokenUtil
+example.project.domain.Project                                 -[#000082,plain]-^ example.common.domain.Entity
+example.project.infrastructure.Project                         -[#008200,dashed]-^ example.project.api.BaseProject
+example.project.infrastructure.Task                            -[#008200,dashed]-^ example.project.api.BaseTask
+example.project.infrastructure.Task                            -[#008200,dashed]-^ example.project.api.BaseTaskValueObject
+example.project.api.BaseTaskValueObject                        -[#008200,dashed]-^ example.project.infrastructure.Task
+example.project.api.BaseTask                                   -[#008200,dashed]-^ example.project.domain.Task
+example.project.domain.Task                                    "1" *-[#595959,plain]-> "hours\n1" example.common.domain.Hours
+example.common.domain.Identity                                 -[#000082,plain]-^ example.common.domain.ValueObject
+example.common.domain.Hours                                    -[#000082,plain]-^ example.common.domain.ValueObject
+example.identity.api.IdentityController                        "1" *-[#595959,plain]-> "userService\n1" example.identity.application.UserService
+
+@enduml
