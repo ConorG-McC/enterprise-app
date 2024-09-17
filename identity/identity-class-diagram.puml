@@ -1,0 +1,75 @@
+@startuml
+
+!theme plain
+top to bottom direction
+skinparam linetype ortho
+
+' Include the legend (key) at the top left
+legend top left
+|= **Symbol** |= **Meaning** |
+| <&interface> **Interface** | Interface |
+| <&enumeration> **Enumeration** | Enumeration (Enum) |
+| [#000082,plain]-^ | Generalization (Inheritance) |
+| [#008200,dashed]-^ | Realization (Interface Implementation) |
+| [#595959,dashed]-> | Dependency |
+| [#595959,plain]-> | Association |
+| [*] **Multiplicity** | Multiplicity Indicator |
+||
+|= **Visibility Indicators** |= **Description** |
+| `+` (plus sign) | Public member |
+| `-` (minus sign) | Private member |
+| `#` (hash sign) | Protected member |
+| `~` (tilde) | Package-private member |
+||
+| **Constructor Notation** | |
+| `<<Create>>` | Constructor method |
+||
+| **Property Indicators** | |
+| Underlined | Static member |
+| *Italicized* | Abstract member |
+endlegend
+
+' Define packages and include classes within them
+
+package "example.identity.api" {
+    class IdentityController {
+        - UserService userService
+        + ResponseEntity<?> validate(UserDetailsRequest)
+    }
+    class UserDetailsRequest {
+        - String username
+        - String password
+        + String toString()
+    }
+}
+
+package "example.identity.application" {
+    class UserService {
+        - UserRepository userRepository
+        - JwtTokenUtil jwtTokenUtil
+        + Optional<String> authenticate(String,String)
+    }
+}
+
+package "example.identity.infrastructure" {
+    interface UserRepository {
+        ~ Optional<AppUser> findUserByUsernameAndPassword(String, String)
+    }
+}
+
+package "example.identity" {
+    class IdentityApplication {
+        + {static} void main(String[])
+    }
+}
+
+' Define relationships between classes
+
+example.identity.api.IdentityController       "1" *-[#595959,plain]-> "userService\n1" example.identity.application.UserService
+example.identity.application.UserService      "1" *-[#595959,plain]-> "userRepository\n1" example.identity.infrastructure.UserRepository
+example.identity.application.UserService      "1" *-[#595959,plain]-> "jwtTokenUtil\n1" JwtTokenUtil
+
+' Inheritance relationships
+org.springframework.data.repository.CrudRepository <|-- example.identity.infrastructure.UserRepository
+
+@enduml
