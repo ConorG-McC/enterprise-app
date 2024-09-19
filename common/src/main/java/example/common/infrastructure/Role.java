@@ -14,14 +14,14 @@ import lombok.Setter;
 public class Role {
     @Id
     @Column(name = "id")
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     @NotNull
     @Column(name = "type")
     private String type;
 
-    public String toString(){
+    public String toString() {
         return type;
     }
 }

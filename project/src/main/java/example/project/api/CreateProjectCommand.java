@@ -13,7 +13,7 @@ public class CreateProjectCommand {
     private String projectName;
     private List<Task> tasks;
 
-    public String toString(){
+    public String toString() {
         String tasksAsString = tasks.stream()
                 .map(Object::toString)
                 .collect(Collectors.joining("\n"));

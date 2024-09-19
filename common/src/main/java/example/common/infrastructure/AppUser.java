@@ -20,35 +20,35 @@ public class AppUser {
     public final static String ID = "id";
 
     @Id
-    @Column(name=ID)
+    @Column(name = ID)
     private String userUUID;
 
     @NotNull
-    @Column(name=USERNAME)
+    @Column(name = USERNAME)
     private String userName;
 
     @NotNull
-    @Column(name=PASSWORD)
+    @Column(name = PASSWORD)
     private String password;
 
     @NotNull
-    @Column(name=EMAIL)
+    @Column(name = EMAIL)
     private String email;
 
     @NotNull
-    @Column(name=FIRST_NAME)
+    @Column(name = FIRST_NAME)
     private String firstName;
 
     @NotNull
-    @Column(name=SURNAME)
+    @Column(name = SURNAME)
     private String surname;
 
-    @ManyToOne(fetch= FetchType.LAZY)
-    @JoinColumn(name="role_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "role_id")
     private Role role;
 
-    public String toString(){
-        return String.format("%s, %s, %s, %s %s" , userUUID,
+    public String toString() {
+        return String.format("%s, %s, %s, %s %s", userUUID,
                 userName, password, email, role);
     }
 }

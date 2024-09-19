@@ -2,6 +2,7 @@ package example.common.domain;
 
 import java.math.BigDecimal;
 import java.util.Objects;
+
 public class Hours extends ValueObject {
 
     public static Hours ZERO = new Hours(0);
@@ -9,8 +10,8 @@ public class Hours extends ValueObject {
     private BigDecimal amount;
 
     public Hours(BigDecimal amount) {
-        assertArgumentNotEmpty(amount.toString(),"Hours cannot be empty");
-        assertValueIsGreaterThan(amount, BigDecimal.ZERO,"Hours cannot be greater than zero");
+        assertArgumentNotEmpty(amount.toString(), "Hours cannot be empty");
+        assertValueIsGreaterThan(amount, BigDecimal.ZERO, "Hours cannot be greater than zero");
         this.amount = amount;
     }
 
@@ -21,8 +22,9 @@ public class Hours extends ValueObject {
     public Hours(int i) {
         this.amount = new BigDecimal(i);
     }
+
     //Shallow copy
-    public Hours(Hours hours){
+    public Hours(Hours hours) {
         this(hours.amount);
     }
 
@@ -43,7 +45,7 @@ public class Hours extends ValueObject {
 
     @Override
     public String toString() {
-        return String.format("amount %s",amount.toString());
+        return String.format("amount %s", amount.toString());
     }
 
     public Hours add(Hours delta) {
@@ -54,8 +56,14 @@ public class Hours extends ValueObject {
         return amount.compareTo(other.amount) >= 0;
     }
 
-    public BigDecimal asBigDecimal() {return amount;}
-    public double asDouble() {return amount.doubleValue();}
+    public BigDecimal asBigDecimal() {
+        return amount;
+    }
+
+    public double asDouble() {
+        return amount.doubleValue();
+    }
+
     public String asString() {
         return amount.toPlainString();
     }

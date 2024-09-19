@@ -21,23 +21,22 @@ public class ProjectController {
     private IdentityService identityService;
 
     //e.g. http://localhost:8901/project/all
-    @GetMapping(path="/all")
-    public ResponseEntity<?>  findAll(@RequestHeader("Authorization") String token) {
+    @GetMapping(path = "/all")
+    public ResponseEntity<?> findAll(@RequestHeader("Authorization") String token) {
         try {
             //Valid ADMIN?
             if (identityService.isAdmin(token)) {
                 return ResponseEntity.ok().body(projectQueryHandler.getAllProjects());
             }
-        }
-        catch (JwtException jwtException){
+        } catch (JwtException jwtException) {
             return generateErrorResponse(jwtException.getMessage());
+        } catch (IllegalArgumentException iae) {
         }
-        catch (IllegalArgumentException iae) {}
         return generateErrorResponse("user not authorised");
     }
 
     //e.g. http://localhost:8901/project/r1
-    @GetMapping(path= "/{projectId}")
+    @GetMapping(path = "/{projectId}")
     public ResponseEntity<?> findById(@PathVariable String projectId,
                                       @RequestHeader("Authorization") String token) {
         try {
@@ -48,60 +47,56 @@ public class ProjectController {
                                 o -> new ResponseEntity<>(o, HttpStatus.OK))
                         .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
             }
-        }
-        catch (JwtException jwtException){
+        } catch (JwtException jwtException) {
             return generateErrorResponse(jwtException.getMessage());
+        } catch (IllegalArgumentException iae) {
         }
-        catch (IllegalArgumentException iae) {}
         return generateErrorResponse("user not authorised");
     }
 
     //e.g. http://localhost:8901/project/task/r1
-    @GetMapping(path= "/task/{projectId}")
+    @GetMapping(path = "/task/{projectId}")
     public ResponseEntity<?> findTasksByProjectId(@PathVariable String projectId,
                                                   @RequestHeader("Authorization") String token) {
         try {
             //Valid user or ADMIN?
-            if (identityService.isAdmin(token)||
+            if (identityService.isAdmin(token) ||
                     identityService.isSpecifiedUser(token, projectId)) {
                 return projectQueryHandler.getProjectTasks(projectId).map(
                                 o -> new ResponseEntity<>(o, HttpStatus.OK))
                         .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
             }
-        }
-        catch (JwtException jwtException){
+        } catch (JwtException jwtException) {
             return generateErrorResponse(jwtException.getMessage());
+        } catch (IllegalArgumentException iae) {
         }
-        catch (IllegalArgumentException iae) {}
         return generateErrorResponse("user not authorised");
     }
 
-    /**e.g. POST http://localhost:8901/project
+    /**
+     e.g. POST http://localhost:8901/project
      {
-     "projectName":"Alessi",
-     "tasks":[
-         {"name":"something","hours":2.4},
-         {"name":"something2","hours":2.5}
-     ]
+         "projectName":"Alessi",
+         "tasks":[
+            {"name":"something","hours":2.4},
+            {"name":"something2","hours":2.5}
+         ]
      }
      **/
     @PostMapping
     public ResponseEntity<?> createProjectWithTasks(@RequestBody CreateProjectCommand command,
-                                                    @RequestHeader("Authorization") String token){
-        try{
+                                                    @RequestHeader("Authorization") String token) {
+        try {
             //Valid ADMIN?
-            if(identityService.isAdmin(token)) {
+            if (identityService.isAdmin(token)) {
                 return new ResponseEntity<>(projectApplicationService.createProjectWithTasks(command),
                         HttpStatus.CREATED);
             }
-        }
-        catch (JwtException jwtException){
+        } catch (JwtException jwtException) {
             return generateErrorResponse(jwtException.getMessage());
-        }
-        catch(ProjectDomainException | JsonParseException e){
+        } catch (ProjectDomainException | JsonParseException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unable to create project: " + e);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred", e);
         }
         return generateErrorResponse("user not authorised");
@@ -119,7 +114,7 @@ public class ProjectController {
         return generateErrorResponse("user not authorised");
     }
 
-    private ResponseEntity<?> generateErrorResponse(String message){
+    private ResponseEntity<?> generateErrorResponse(String message) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(message);
     }
 }

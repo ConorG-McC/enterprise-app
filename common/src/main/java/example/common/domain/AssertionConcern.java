@@ -1,7 +1,6 @@
 package example.common.domain;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 public abstract class AssertionConcern {
@@ -10,7 +9,7 @@ public abstract class AssertionConcern {
         super();
     }
 
-    protected void assertArgumentIsUUID(String id) throws IllegalArgumentException{
+    protected void assertArgumentIsUUID(String id) throws IllegalArgumentException {
         UUID.fromString(id.trim());//throws IllegalArgumentException if invalid
     }
 
@@ -28,32 +27,20 @@ public abstract class AssertionConcern {
         }
     }
 
-    protected void assertValueIsBetween(Long value, Long aMinimum, Long aMaximum, String aMessage){
-        if (value < aMinimum || value > aMaximum ) {
+    protected void assertValueIsBetween(Long value, Long aMinimum, Long aMaximum, String aMessage) {
+        if (value < aMinimum || value > aMaximum) {
             throw new IllegalArgumentException(aMessage);
         }
     }
 
-    protected void assertValueIsGreaterThan(BigDecimal value, BigDecimal aMinimum, String aMessage){
-        if (value.compareTo(aMinimum) < 0 ) {
+    protected void assertValueIsGreaterThan(BigDecimal value, BigDecimal aMinimum, String aMessage) {
+        if (value.compareTo(aMinimum) < 0) {
             throw new IllegalArgumentException(aMessage);
         }
     }
 
     protected void assertArgumentNotEmpty(Object o, String aMessage) {
         if (o == null || o.toString().trim().isEmpty()) {
-            throw new IllegalArgumentException(aMessage);
-        }
-    }
-
-    protected void assertDateIsBefore(LocalDateTime dateBeingChecked, LocalDateTime dateMustBeBefore, String aMessage) {
-        if (dateBeingChecked.isBefore(dateMustBeBefore)) {
-            throw new IllegalArgumentException(aMessage);
-        }
-    }
-
-    protected void assertDateIsAfter(LocalDateTime dateBeingChecked, LocalDateTime dateMustBeAfter, String aMessage) {
-        if (dateBeingChecked.isAfter(dateMustBeAfter)) {
             throw new IllegalArgumentException(aMessage);
         }
     }

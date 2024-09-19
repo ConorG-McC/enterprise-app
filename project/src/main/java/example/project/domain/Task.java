@@ -24,7 +24,9 @@ public class Task extends ValueObject implements BaseTask { //BaseMenuItem (live
         setHours(hours);
     }
 
-    public long id(){return id;}
+    public long id() {
+        return id;
+    }
 
     public String name() {
         return name;
@@ -50,7 +52,7 @@ public class Task extends ValueObject implements BaseTask { //BaseMenuItem (live
         this.hours = hours;
     }
 
-    public String toString(){
+    public String toString() {
         return String.format("id=%s, name=%s, hours=%s", id(), name, hours);
     }
 

@@ -23,9 +23,9 @@ public class RabbitMQConfig {
     private String password;
 
     @Bean
-    public ConnectionFactory getConnection(){
+    public ConnectionFactory getConnection() {
         // set up the connection
-        CachingConnectionFactory connectionFactory=new CachingConnectionFactory(hostname);
+        CachingConnectionFactory connectionFactory = new CachingConnectionFactory(hostname);
         connectionFactory.setUsername(username);
         connectionFactory.setPassword(password);
         connectionFactory.setVirtualHost(username);

@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.ComponentScan;
 
-@ComponentScan(basePackages = { "example.*" }) //To locate JWTTokenUtil in common
+@ComponentScan(basePackages = {"example.*"}) //To locate JWTTokenUtil in common
 @EntityScan("example.*")//To locate AppUser in common
 @EnableRabbit
 @SpringBootApplication

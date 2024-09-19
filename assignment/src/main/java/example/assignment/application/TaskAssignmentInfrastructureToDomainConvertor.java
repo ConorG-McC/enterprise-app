@@ -1,10 +1,11 @@
 package example.assignment.application;
 
-import example.common.domain.Identity;
-import example.common.domain.Hours;
-import example.assignment.domain.*;
+import example.assignment.domain.Project;
+import example.assignment.domain.TaskAssignmentLineItem;
 import example.assignment.infrastructure.AssignedTaskItem;
 import example.assignment.infrastructure.TaskAssignment;
+import example.common.domain.Hours;
+import example.common.domain.Identity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,8 +23,8 @@ public class TaskAssignmentInfrastructureToDomainConvertor {
 
 
         return example.assignment.domain.TaskAssignment.createAssignment(new Identity(ta.getId()),
-                                    ta.getConsumer_id(),
-                                    project,
-                                    orderItems);
+                ta.getConsumer_id(),
+                project,
+                orderItems);
     }
 }

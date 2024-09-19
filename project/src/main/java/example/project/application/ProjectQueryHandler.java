@@ -1,8 +1,8 @@
 package example.project.application;
 
 import example.project.api.BaseProject;
-import example.project.api.GetProjectTaskResponse;
 import example.project.api.GetProjectResponse;
+import example.project.api.GetProjectTaskResponse;
 import example.project.infrastructure.ProjectRepository;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;

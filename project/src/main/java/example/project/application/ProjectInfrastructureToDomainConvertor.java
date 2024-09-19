@@ -1,9 +1,9 @@
 package example.project.application;
 
-import example.common.domain.Identity;
 import example.common.domain.Hours;
-import example.project.api.BaseTask;
+import example.common.domain.Identity;
 import example.project.api.BaseProject;
+import example.project.api.BaseTask;
 import example.project.domain.Project;
 import example.project.infrastructure.Task;
 

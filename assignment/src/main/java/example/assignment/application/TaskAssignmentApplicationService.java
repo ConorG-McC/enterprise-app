@@ -1,13 +1,12 @@
 package example.assignment.application;
 
+import example.assignment.api.AddNewAssignmentCommand;
+import example.assignment.domain.TaskAssignmentLineItem;
+import example.assignment.infrastructure.ProjectRepository;
+import example.assignment.infrastructure.TaskAssignment;
+import example.assignment.infrastructure.TaskAssignmentRepository;
 import example.common.domain.Identity;
 import example.common.domain.UniqueIDFactory;
-import example.assignment.api.AddNewAssignmentCommand;
-import example.assignment.domain.*;
-
-import example.assignment.infrastructure.ProjectRepository;
-import example.assignment.infrastructure.TaskAssignmentRepository;
-import example.assignment.infrastructure.TaskAssignment;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
@@ -26,15 +25,15 @@ public class TaskAssignmentApplicationService {
 
     @Transactional //Needed to ensure save is committed
     public void addNewAssignment(AddNewAssignmentCommand command) throws AssignmentOfTaskDomainException {
-        try{
+        try {
             example.assignment.domain.Project project = findProject(command.getProjectId());
             //ensure that all menu items supplied for the order already exist in restaurant's list of menu items
             command.getTaskAssignmentLineItems().stream()
-                .forEach(assignmentLineItem -> {
-                    if (!project.findTask(assignmentLineItem.taskId())) {
-                        throw new IllegalArgumentException("Task id does not exist: " + assignmentLineItem.taskId());
-                    }
-                });
+                    .forEach(assignmentLineItem -> {
+                        if (!project.findTask(assignmentLineItem.taskId())) {
+                            throw new IllegalArgumentException("Task id does not exist: " + assignmentLineItem.taskId());
+                        }
+                    });
 
 
             List<TaskAssignmentLineItem> orderItems = command.getTaskAssignmentLineItems();
@@ -43,22 +42,23 @@ public class TaskAssignmentApplicationService {
 
             //Pass info to aggregate to validate
             example.assignment.domain.TaskAssignment newTaskAssignment = example.assignment.domain.TaskAssignment.createAssignment(idOfNewAssignment,
-                                                command.getConsumerId(),
-                                                project,
-                                                orderItems);
+                    command.getConsumerId(),
+                    project,
+                    orderItems);
             //Convert and save
-           assignmentRepository.save(TaskAssignmentDomainToInfrastructureConvertor.convert(newTaskAssignment));
-        }
-        catch (IllegalArgumentException e) {
+            assignmentRepository.save(TaskAssignmentDomainToInfrastructureConvertor.convert(newTaskAssignment));
+        } catch (IllegalArgumentException e) {
             LOG.info(e.getMessage());
             throw new AssignmentOfTaskDomainException(e.getMessage());
         }
     }
 
     public void cancelAssignment(String assignmentId) throws AssignmentOfTaskDomainException {
-        try{
+        try {
             Optional<TaskAssignment> assignmentToBeCancelled = assignmentRepository.findById(assignmentId);
-            if(assignmentToBeCancelled.isEmpty()){ throw new IllegalArgumentException("Assignment id does not exist");}
+            if (assignmentToBeCancelled.isEmpty()) {
+                throw new IllegalArgumentException("Assignment id does not exist");
+            }
 
             example.assignment.domain.Project project = findProject(assignmentToBeCancelled.get().getProject_id());
             //Convert to domain and cancel
@@ -66,8 +66,7 @@ public class TaskAssignmentApplicationService {
             taskAssignmentToCancel.cancelAssignment();
             //Convert to infrastructure and save
             assignmentRepository.save(TaskAssignmentDomainToInfrastructureConvertor.convert(taskAssignmentToCancel));
-        }
-        catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             LOG.info(e.getMessage());
             throw new AssignmentOfTaskDomainException(e.getMessage());
         }
@@ -76,7 +75,9 @@ public class TaskAssignmentApplicationService {
     private example.assignment.domain.Project findProject(String idOfProject) {
         //Check project id is valid
         Optional<example.assignment.infrastructure.Project> projectFromRepo = projectRepository.findById(idOfProject);
-        if(projectFromRepo.isEmpty()){ throw new IllegalArgumentException("Project id does not exist");}
+        if (projectFromRepo.isEmpty()) {
+            throw new IllegalArgumentException("Project id does not exist");
+        }
         //convert project from infrastructure to domain
         return ProjectInfrastructureToDomainConvertor.convert(projectFromRepo.get());
     }

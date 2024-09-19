@@ -5,8 +5,8 @@ import example.project.api.BaseTaskValueObject;
 import jakarta.persistence.*;
 import lombok.*;
 
-@Entity(name="task")
-@Table(name="task")
+@Entity(name = "task")
+@Table(name = "task")
 @Setter
 @Getter
 @ToString
@@ -15,21 +15,21 @@ import lombok.*;
 //interface enables GetOrderItemsResponse to avoid coupling to interface layer via MenuItemValueObject
 public class Task implements BaseTaskValueObject {
     @Id
-    @SequenceGenerator(name= "task_sequence",
+    @SequenceGenerator(name = "task_sequence",
             sequenceName = "task_sequence_id",
             allocationSize = 1)
-    @GeneratedValue(strategy=GenerationType.IDENTITY,
-            generator="task_sequence")
-    @Column(name="task_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY,
+            generator = "task_sequence")
+    @Column(name = "task_id")
     private long id;
 
-    @Column(name="task_name")
+    @Column(name = "task_name")
     private String name;
 
-    @Column(name="task_estimated_hours")
+    @Column(name = "task_estimated_hours")
     private double hours;
 
     @JsonIgnore //not displayed in list when JSONing menu items
-    @Column(name="project_id")
+    @Column(name = "project_id")
     private String project_id;
 }

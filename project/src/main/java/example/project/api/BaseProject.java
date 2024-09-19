@@ -1,6 +1,7 @@
 package example.project.api;
 
 import example.project.infrastructure.Task;
+
 import java.util.List;
 
 //Avoid coupling infrastructure to api
