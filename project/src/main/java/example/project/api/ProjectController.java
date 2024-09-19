@@ -74,14 +74,14 @@ public class ProjectController {
     }
 
     /**
-     * e.g. POST http://localhost:8901/project
-     * {
-     * "projectName":"Alessi",
-     * "tasks":[
-     * {"name":"something","hours":2.4},
-     * {"name":"something2","hours":2.5}
-     * ]
-     * }
+     e.g. POST http://localhost:8901/project
+     {
+         "projectName":"Alessi",
+         "tasks":[
+            {"name":"something","hours":2.4},
+            {"name":"something2","hours":2.5}
+         ]
+     }
      **/
     @PostMapping
     public ResponseEntity<?> createProjectWithTasks(@RequestBody CreateProjectCommand command,

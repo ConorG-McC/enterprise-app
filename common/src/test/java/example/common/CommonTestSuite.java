@@ -7,11 +7,12 @@ import org.junit.platform.suite.api.Suite;
 @Suite
 @SelectClasses(
         {
-                HoursTests.class,
                 EntityTests.class,
                 UniqueIDFactoryTests.class,
                 AggregateEventTests.class,
+                IdentifiedValueObjectTests.class,
                 AssertionConcernTests.class,
+                HoursTests.class,
                 IdentityTests.class
         }
 )

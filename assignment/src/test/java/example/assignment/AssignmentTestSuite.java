@@ -1,6 +1,6 @@
 package example.assignment;
 
-import example.assignment.api.AssignmentControllerTests;
+import example.assignment.api.AssignmentControllerTest;
 import example.assignment.api.ProjectControllerTest;
 import example.assignment.domain.ProjectTests;
 import example.assignment.domain.TaskAssignmentLineItemTests;
@@ -17,7 +17,7 @@ import org.junit.platform.suite.api.Suite;
                 TaskAssignmentTests.class,
                 TaskAssignmentLineItemTests.class,
                 ProjectControllerTest.class,
-                AssignmentControllerTests.class
+                AssignmentControllerTest.class
 
         }
 )

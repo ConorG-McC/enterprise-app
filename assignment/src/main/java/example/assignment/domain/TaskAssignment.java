@@ -50,7 +50,7 @@ public class TaskAssignment extends Entity {
         return lineItems;
     }
 
-    public String restaurantId() {
+    public String projectId() {
         return projectId;
     }
 

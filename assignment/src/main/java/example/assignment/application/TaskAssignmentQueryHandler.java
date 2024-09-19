@@ -49,6 +49,7 @@ public class TaskAssignmentQueryHandler {
     private GetTaskAssignmentItemsResponse makeGetAssignmentTasksResponse(TaskAssignment taskAssignment) {
         LOG.info("Mapping TaskAssignment to GetTaskAssignmentItemsResponse: {}", taskAssignment);
 
+
         // Get the list of AssignedTaskItem from TaskAssignment
         List<AssignedTaskItem> assignedTaskItems = taskAssignment.getAssignedTaskItem();
 

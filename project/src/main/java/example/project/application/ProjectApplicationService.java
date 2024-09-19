@@ -86,7 +86,6 @@ public class ProjectApplicationService {
 
     public String deleteProjectById(String projectId) throws ProjectDomainException {
 
-
         try {
             if (projectId == null || projectId.isEmpty()) {
                 throw new ProjectDomainException("Project id is null or empty");

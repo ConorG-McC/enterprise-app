@@ -10,7 +10,7 @@ public class TaskAssignmentDomainToInfrastructureConvertor {
         //Map to infrastructure
         TaskAssignment o = TaskAssignment.taskAssignmentOf(taskAssignment.id().toString(),
                 taskAssignment.consumerId(),
-                taskAssignment.restaurantId(),
+                taskAssignment.projectId(),
                 taskAssignment.state().ordinal());
 
         //Convert all menu items to entities

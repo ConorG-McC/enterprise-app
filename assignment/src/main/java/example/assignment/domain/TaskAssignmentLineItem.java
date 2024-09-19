@@ -12,24 +12,24 @@ import java.math.BigDecimal;
 public class TaskAssignmentLineItem extends IdentifiedValueObject {
     final int MINIMUM_QUANTITY = 1;
 
-    private long taskId;
-    private String taskName;
+    private long id;
+    private String name;
     private Hours hours;
 
-    public TaskAssignmentLineItem(long taskId, String taskName, Hours hours) {
-        setTaskId(taskId);
-        setTaskName(taskName);
+    public TaskAssignmentLineItem(long id, String name, Hours hours) {
+        setId(id);
+        setName(name);
         setHours(hours);
     }
 
-    private void setTaskId(long taskId) {
-        assertArgumentNotEmpty(taskId, "Task id cannot be empty");
-        this.taskId = taskId;
+    public void setId(long id) {
+        assertArgumentNotEmpty(id, "Task id cannot be empty");
+        this.id = id;
     }
 
-    private void setTaskName(String taskName) {
-        assertArgumentNotEmpty(taskName, "Name cannot be empty");
-        this.taskName = taskName;
+    private void setName(String name) {
+        assertArgumentNotEmpty(name, "Name cannot be empty");
+        this.name = name;
     }
 
     private void setHours(Hours hours) {
@@ -41,11 +41,11 @@ public class TaskAssignmentLineItem extends IdentifiedValueObject {
 
 
     public long taskId() {
-        return taskId;
+        return id;
     }
 
     public String name() {
-        return taskName;
+        return name;
     }
 
     public Hours hours() {

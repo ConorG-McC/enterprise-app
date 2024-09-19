@@ -66,12 +66,13 @@ public class AssignmentController {
     }
 
     @PostMapping("/{taskAssignmentId}/cancel")
-    public HttpStatus cancelAssignment(@PathVariable String taskAssignmentId) {
+    public ResponseEntity<String> cancelAssignment(@PathVariable String taskAssignmentId) {
         try {
             taskAssignmentApplicationService.cancelAssignment(taskAssignmentId);
-            return HttpStatus.OK;
+            return ResponseEntity.ok("Assignment cancelled successfully");
         } catch (AssignmentOfTaskDomainException e) {
-            return HttpStatus.BAD_REQUEST;
+            return ResponseEntity.badRequest().body("Bad request");
         }
     }
+
 }
