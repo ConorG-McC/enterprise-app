@@ -1,9 +1,5 @@
 @startuml
-skinparam rectangle {
-  BackgroundColor Pink
-  BorderColor Black
-}
- 
-rectangle "This is a pink box" as PinkBox
+skinparam ArrowColor #FF5A4C
+skinparam sequenceMessageAlign center
  
 @enduml
