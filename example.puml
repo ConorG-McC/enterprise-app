@@ -1,24 +1,9 @@
 @startuml
-class User {
-  +String name
-  +String email
-  +void login()
-  +void logout()
+skinparam rectangle {
+  BackgroundColor Pink
+  BorderColor Black
 }
  
-class Product {
-  +String name
-  +float price
-  +void displayDetails()
-}
+rectangle "This is a pink box" as PinkBox
  
-class Order {
-  +int orderId
-  +Date date
-  +addItem(Product p)
-  +removeItem(Product p)
-}
- 
-User --> Order : places >
-Order *--> Product : contains >
 @enduml
