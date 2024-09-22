@@ -1,5 +1,0 @@
-@startuml
-skinparam ArrowColor #FF5A4C
-skinparam sequenceMessageAlign center
- 
-@enduml
